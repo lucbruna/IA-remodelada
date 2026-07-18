@@ -74,7 +74,8 @@ TEMPERATURE = 0.5            # 0.3 para chamadas de ferramentas precisas, 0.7+ p
                               # mas natural o suficiente para respostas de texto.
 
 # --- Configuracoes de robustez (evitam travamentos e loops infinitos) ---
-OLLAMA_TIMEOUT_SECONDS = 120    # se o modelo nao responder nesse tempo, aborta o turno
+OLLAMA_TIMEOUT_SECONDS = 300    # se o modelo nao responder nesse tempo, aborta o turno (aumentado para Llama 3.1)
+OLLAMA_KEEP_ALIVE = "5m"      # mantem o modelo carregado na memoria por 5min entre chamadas
 MAX_TOOL_ROUNDS = 15            # limite de idas-e-voltas de ferramentas por pergunta
 MAX_HISTORY_MESSAGES = 80       # mensagens antigas sao resumidas para nao estourar o contexto
 OLLAMA_MAX_RETRIES = 3          # tentativas extras se a chamada ao Ollama falhar
@@ -225,6 +226,7 @@ def _chat_with_retries(model: str, messages: list, tools: list) -> Any:
                 model=model,
                 messages=messages,
                 tools=tools,
+                keep_alive=OLLAMA_KEEP_ALIVE,
                 options={"num_ctx": NUM_CTX, "temperature": TEMPERATURE},
             )
         except TimeoutError as e:
@@ -2718,6 +2720,61 @@ def analyze_image_advanced(path: str, questions: str = "") -> str:
     return describe_image(path, questions or "Descreva esta imagem")
 
 
+# =======================================================================
+# DASHBOARD
+# =======================================================================
+
+def abrir_dashboard(modo: str = "texto") -> str:
+    """Abre o dashboard interativo do agente em uma nova janela/janela do terminal.
+
+    O dashboard mostra metricas em tempo real: memoria, ferramentas usadas,
+    grafo de conhecimento, analytics, top ferramentas, categorias e muito mais.
+    Funciona com ou sem a biblioteca Rich (modo texto simples fallback).
+
+    Args:
+        modo: "texto" para modo simples (funciona sem Rich),
+              "rich" para modo grafico colorido (requer pip install rich),
+              "auto" para detectar automaticamente (padrao)
+
+    Returns:
+        Mensagem de confirmacao informando que o dashboard foi aberto    """
+    script_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "agente_dashboard.py")
+
+    if not os.path.exists(script_path):
+        return f"Erro: arquivo do dashboard nao encontrado em: {script_path}"
+
+    try:
+        # Abre o dashboard em uma NOVA janela de terminal para nao travar o chat
+        # CREATE_NEW_CONSOLE faz o dashboard abrir em sua propria janela no Windows
+        if hasattr(subprocess, 'CREATE_NEW_CONSOLE'):
+            flags = subprocess.CREATE_NEW_CONSOLE
+        else:
+            flags = 0
+
+        if modo == "texto":
+            processo = subprocess.Popen(
+                [sys.executable, script_path],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                creationflags=flags
+            )
+        else:
+            processo = subprocess.Popen(
+                [sys.executable, script_path],
+                creationflags=flags
+            )
+        
+        pid = processo.pid
+        return (
+            f"📊 Dashboard aberto em nova janela! (PID: {pid})\n"
+            f"   O dashboard mostra metricas de memoria, ferramentas, grafo, timeline e mais.\n"
+            f"   Feche a janela do dashboard quando quiser voltar ao chat.\n"
+            f"   Dica: use abrir_dashboard(modo='texto') para versao simples no terminal."
+        )
+    except Exception as e:
+        return f"Erro ao abrir dashboard: {e}"
+
+
 AVAILABLE_FUNCTIONS = {
     # Arquivos e pastas
     "create_folder": create_folder,
@@ -2801,6 +2858,7 @@ AVAILABLE_FUNCTIONS = {
     "git_clone": git_clone,
     "pip_install": pip_install,
     "extract_file": extract_file,
+    "abrir_dashboard": abrir_dashboard,
 }
 
 # Carrega plugins automaticamente (adiciona ao TOOLS_LIST e AVAILABLE_FUNCTIONS)
@@ -3279,14 +3337,17 @@ TOOLS_LIST = [
                     "url": {"type": "string", "description": "URL do repositorio Git"},
                     "output_dir": {"type": "string", "description": "Pasta de destino (opcional)"}
                 },
-                "required": ["url"]
-            }
+                "required": ["url"]            }
         }
     },
-    {
-        "type": "function",
-        "function": {
-            "name": "pip_install",
+    {"type": "function", "function": {
+        "name": "abrir_dashboard",
+        "description": "Abre o dashboard interativo do agente em uma nova janela. Mostra metricas de memoria, ferramentas, grafo de conhecimento, timeline, categorias, analytics em tempo real.",
+        "parameters": {"type": "object", "properties": {
+            "modo": {"type": "string", "description": "Modo do dashboard: 'auto' (automatico), 'rich' (colorido), 'texto' (simples)"}
+        }, "required": []}}},
+    {"type": "function", "function": {
+        "name": "pip_install",
             "description": "Instala pacotes Python via pip. Ex: requests, numpy, flask.",
             "parameters": {
                 "type": "object",
@@ -3474,12 +3535,51 @@ def _build_system_prompt() -> str:
         "  Para QUALQUER tarefa de programacao, use gerar_codigo + code_review +",
         "  run_python_code em sequencia. Nao escreva codigo manualmente no chat.",
         "",
-        "6.5. SUB-AGENTES ESPECIALISTAS (para tarefas complexas):",
-        "  - subagente_codigo(tarefa)   -> DELEGA programacao para engenheiro senior",
-        "  - subagente_analise(tarefa)  -> DELEGA analise/pesquisa para analista",
-        "  - subagente_criativo(tarefa) -> DELEGA criacao para escritor profissional",
-        "  Use sub-agentes para tarefas que exigem DEEP THINKING especializado.",
-        "  Ex: 'subagente_codigo(\"Crie um script que baixa arquivos e salva em CSV\")'",
+        "6.5. SUB-AGENTES ESPECIALISTAS (delegue tarefas complexas para especialistas):",
+        "  Voce tem acesso a 3 sub-agentes especialistas que podem pensar DEEP e retornar",
+        "  resultados prontos. Use SEMPRE que a tarefa exigir raciocinio profundo.",
+        "",
+        "  🔧 subagente_codigo(tarefa)  -> Engenheiro de Software Senior",
+        "     Quando usar:",
+        "       - Escrever scripts complexos (automacao, scraping, CLI)",
+        "       - Debuggar codigo com erro e descobrir a causa raiz",
+        "       - Refatorar codigo existente para melhorar qualidade",
+        "       - Explicar algoritmos, estruturas de dados, padroes de design",
+        "       - Criar testes unitarios, migrar codigo entre linguagens",
+        "     Ex: subagente_codigo('Crie um script Python que le um CSV, filtra linhas duplicadas e salva em Excel')",
+        "     Ex: subagente_codigo('Debug este codigo: [cole o codigo com erro]')",
+        "",
+        "  📊 subagente_analise(tarefa) -> Analista Senior",
+        "     Quando usar:",
+        "       - Comparar tecnologias, bibliotecas, abordagens (pros/contas)",
+        "       - Analisar dados, tendencias, metricas e tirar conclusoes",
+        "       - Planejar projetos, dividir em etapas, estimar prazos",
+        "       - Sintetizar informacoes de multiplas fontes",
+        "       - Tomar decisoes baseadas em evidencias",
+        "     Ex: subagente_analise('Compare Python vs JavaScript para automacao de tarefas locais com IA')",
+        "     Ex: subagente_analise('Analise os pros e contras de usar SQLite vs PostgreSQL neste projeto')",
+        "",
+        "  🎨 subagente_criativo(tarefa) -> Escritor/Designer Criativo",
+        "     Quando usar:",
+        "       - Criar nomes, slogans, marcas, branding",
+        "       - Escrever textos persuasivos, emails, campanhas",
+        "       - Criar historias, roteiros, dialogos, poesia",
+        "       - Gerar conteudo para redes sociais, newsletters",
+        "       - Brainstorming de ideias inovadoras",
+        "     Ex: subagente_criativo('Crie 5 sugestoes de nomes criativos para um assistente IA local brasileiro')",
+        "     Ex: subagente_criativo('Escreva um email profissional oferecendo servicos de automacao com IA')",
+        "",
+        "  🧠 PADRAO DE USO RECOMENDADO:",
+        "  PASSO 1: Planeje — divida tarefas complexas em partes",
+        "  PASSO 2: Delegue — chame o sub-agente certo para cada parte",
+        "  PASSO 3: Combine — junte os resultados e apresente ao usuario",
+        "",
+        "  Exemplo de fluxo multicamada:",
+        "  1. subagente_analise('Planeje um script que organiza Downloads por tipo de arquivo')",
+        "  2. subagente_codigo('Implemente o plano acima em Python com as libs os e shutil')",
+        "  3. run_python_code(codigo)  -> executa o codigo gerado pelo sub-agente",
+        "",
+        "  REGRA DE OURO: Se a tarefa tem mais de 3 etapas, DELEGUE para sub-agentes.",
         "",
         "7. AUTO-APRIMORAMENTO E MEMORIA EVOLUTIVA:",
         "  - processar_conversa()      -> extrai fatos e aprendizados automaticamente",
@@ -3530,7 +3630,7 @@ def _build_system_prompt() -> str:
         "33. Use falar_texto para falar em VOZ ALTA, listar_vozes_tts para ver vozes,",
         "    e salvar_audio para gerar arquivos de audio.",
         "34. Use install_plugin para baixar e instalar plugins NOVOS de URLs da internet.",
-        "35. Use python agente_dashboard.py para interface DASHBOARD com Rich.",
+        "35. Use abrir_dashboard() para abrir o DASHBOARD interativo com metricas em tempo real.",
         "36. Use python agente_api_server.py para iniciar servidor REST API.",
         "\n--- TURBO MODE (inteligencia avancada) ---",
         "37. Para tarefas COMPLEXAS, use task_decompose() primeiro para quebrar em subtarefas.",
