@@ -83,6 +83,10 @@ def _atualizar_diario():
             "erros": 0,
             "ferramentas": Counter(),
         }
+    # Garante que ferramentas e sempre um Counter (JSON nao preserva o tipo)
+    ferramentas = diario[hoje].get("ferramentas", {})
+    if not isinstance(ferramentas, Counter):
+        diario[hoje]["ferramentas"] = Counter(ferramentas)
     return diario
 
 

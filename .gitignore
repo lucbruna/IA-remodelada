@@ -12,3 +12,16 @@ debug_log.txt
 *.log
 .DS_Store
 Thumbs.db
+
+# Coverage
+.coverage
+htmlcov/
+
+# Downloads e temporarios
+nul
+test_download
+downloads/
+
+# Ambiente
+.vscode/
+.idea/

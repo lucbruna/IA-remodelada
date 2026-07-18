@@ -59,7 +59,7 @@ os.makedirs(DATA_DIR, exist_ok=True)
 MEMORY_FILE = os.path.join(DATA_DIR, "memoria.json")
 HISTORY_FILE = os.path.join(DATA_DIR, "historico.json")
 
-MODEL = "qwen2.5:7b"     # modelo de texto/tools (1.5B, 986MB, 32k contexto nativo, excelente tool calling)
+MODEL = "llama3.1"       # modelo de texto/tools (8B, 4.9GB, excelente tool calling e raciocinio)
 VISION_MODEL = "llava"      # modelo com visao, para descrever imagens
 
 # --- Qualidade de raciocinio ---
@@ -67,8 +67,8 @@ VISION_MODEL = "llava"      # modelo com visao, para descrever imagens
 # (frequentemente 2048-4096 tokens), o que faz o modelo "esquecer" partes
 # da conversa ou de resultados de ferramentas mesmo sendo um bom modelo.
 # Aumentar isso e um dos ajustes que mais melhora a qualidade das respostas.
-NUM_CTX = 16384               # janela de contexto (tokens). Qwen 2.5 suporta 32k nativamente.
-                              # 8k e suficiente para conversas longas com tool calls.
+NUM_CTX = 16384               # janela de contexto (tokens). Llama 3.1 suporta 128k nativamente.
+                              # 16k e um bom equilibrio entre memoria e desempenho.
 TEMPERATURE = 0.5            # 0.3 para chamadas de ferramentas precisas, 0.7+ para criatividade.
                               # 0.5 e um bom equilibrio: preciso o suficiente para tools,
                               # mas natural o suficiente para respostas de texto.
@@ -98,6 +98,50 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
 )
+
+
+def ensure_ollama() -> bool:
+    """
+    Verifica se o Ollama esta rodando e tenta iniciar automaticamente se nao estiver.
+    
+    Tenta conectar na API do Ollama (localhost:11434). Se falhar, tenta
+    executar 'ollama serve' em background e espera alguns segundos.
+    
+    Returns:
+        True se conseguiu conectar, False se nao foi possivel.
+    """
+    try:
+        import urllib.request
+        req = urllib.request.Request("http://localhost:11434/api/tags", method="GET")
+        urllib.request.urlopen(req, timeout=3)
+        return True  # Ollama ja esta rodando
+    except Exception:
+        pass
+    
+    # Tenta iniciar o Ollama
+    try:
+        logging.info("Ollama nao detectado. Tentando iniciar...")
+        subprocess.Popen(
+            ["ollama", "serve"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            creationflags=subprocess.CREATE_NO_WINDOW if hasattr(subprocess, 'CREATE_NO_WINDOW') else 0
+        )
+        # Aguarda alguns segundos para iniciar
+        for _ in range(10):
+            time.sleep(1)
+            try:
+                req = urllib.request.Request("http://localhost:11434/api/tags", method="GET")
+                urllib.request.urlopen(req, timeout=2)
+                logging.info("Ollama iniciado com sucesso!")
+                return True
+            except Exception:
+                continue
+        logging.warning("Nao foi possivel iniciar o Ollama automaticamente.")
+        return False
+    except Exception as e:
+        logging.warning("Erro ao tentar iniciar Ollama: %s", e)
+        return False
 
 
 def _call_ollama_with_timeout(
@@ -3430,14 +3474,28 @@ def _build_system_prompt() -> str:
         "  Para QUALQUER tarefa de programacao, use gerar_codigo + code_review +",
         "  run_python_code em sequencia. Nao escreva codigo manualmente no chat.",
         "",
-        "7. AUTO-APRIMORAMENTO E MEMORIA:",
+        "6.5. SUB-AGENTES ESPECIALISTAS (para tarefas complexas):",
+        "  - subagente_codigo(tarefa)   -> DELEGA programacao para engenheiro senior",
+        "  - subagente_analise(tarefa)  -> DELEGA analise/pesquisa para analista",
+        "  - subagente_criativo(tarefa) -> DELEGA criacao para escritor profissional",
+        "  Use sub-agentes para tarefas que exigem DEEP THINKING especializado.",
+        "  Ex: 'subagente_codigo(\"Crie um script que baixa arquivos e salva em CSV\")'",
+        "",
+        "7. AUTO-APRIMORAMENTO E MEMORIA EVOLUTIVA:",
         "  - processar_conversa()      -> extrai fatos e aprendizados automaticamente",
         "  - memoria_guardar/buscar    -> memoria semantica por significado",
+        "  - memoria_estatisticas()    -> veja estatisticas da sua memoria",
         "  - perfil_mostrar/aprender   -> perfil adaptativo do usuario",
-        "  - grafo_adicionar/visualizar-> grafo de conhecimento",
+        "  - perfil_observar()         -> adicione observacoes sobre o usuario",
+        "  - grafo_adicionar/visualizar-> grafo de conhecimento (conceitos interligados)",
+        "  - grafo_listar()            -> veja conceitos mais usados",
         "  - sumario_gerar()           -> sumarios diarios/semanais",
-        "  - auto_evolve()             -> auto-avaliacao e otimizacao de parametros",
-        "  Use estas ferramentas PROATIVAMENTE para aprender e melhorar.",
+        "  - refletir()                -> auto-reflexao: veja o que aprendeu",
+        "  - aprender_com_erro()       -> registre erros para nao repetir",
+        "  - memoria_contexto()        -> contexto automatico da memoria",
+        "  Use estas ferramentas PROATIVAMENTE para aprender e evoluir.",
+        "  SEMPRE chame memoria_contexto() no inicio de cada interacao para",
+        "  lembrar de conversas e preferencias passadas.",
         "",
         "8. RESULTADOS: Ao final de cada tarefa, mostre SEMPRE os resultados reais:",
         "  caminhos de arquivos criados, tamanhos, URLs baixadas, numero de linhas de",
@@ -3589,66 +3647,73 @@ def _is_download_request(messages: list) -> bool:
 
 def _force_download(messages: list, notify) -> str:
     """Tenta executar download forcado quando o modelo recusa."""
-    import subprocess
     import re
 
     ultima_msg = ""
+    output_dir = ""
     for msg in reversed(messages):
         if msg["role"] == "user":
             ultima_msg = msg["content"]
+            # Extrair diretorio de destino se mencionado
+            dir_match = re.search(r'(?:em|para|em:|para:?)\s*([a-zA-Z]:[^\s,.!?]*)', ultima_msg)
+            if dir_match:
+                output_dir = dir_match.group(1).strip()
             break
 
-    # Extrair possivel URL da mensagem
-    urls = re.findall(r'https?://[^\s]+', ultima_msg)
-    if urls:
-        url = urls[0]
-        notify(f"Forcando download: {url}")
-        return download_file(url)
-
-    # Extrair possivel repositorio GitHub
+    # Extrair possivel repositorio GitHub da mensagem
     repo_match = re.search(r'(?:github|gitlab)[^\s]*[/:]([\w.-]+/[\w.-]+)', ultima_msg)
-    if repo_match or any(kw in ultima_msg.lower() for kw in ["clone", "github", "gitlab", "repositorio", "repo"]):
-        # Tenta git clone do nome extraido
-        nome_projeto = "erp-next"
-        for palavra in ultima_msg.split():
-            palavra_limpa = palavra.strip(",.!?;:\"'")
-            if palavra_limpa and not any(kw in palavra_limpa.lower() for kw in ["baixar", "download", "arquivo", "de", "do", "da", "o", "para"]):
-                nome_projeto = palavra_limpa
-                break
+    repo_url = ""
+    if repo_match:
+        repo_url = f"https://github.com/{repo_match.group(1)}"
 
-        repo_url = f"https://github.com/{nome_projeto}/{nome_projeto}" if "/" not in nome_projeto else f"https://github.com/{nome_projeto}"
-        notify(f"Repositorio detectado, tentando git clone: {repo_url}")
+    # Extrair nome do projeto da mensagem
+    palavra_chave = ""
+    for palavra in ultima_msg.split():
+        pl = palavra.strip(",.!?;:\"'")
+        if pl.lower() not in ("baixar", "download", "arquivo", "de", "do", "da", "o", "para", "clone", "github", "gitlab", "crie", "criar", "pasta", "uma", "os", "e", "em", "os"):
+            palavra_chave = pl
+            break
 
-        # Tentar localizar a URL real via web search
-        try:
-            resultados = web_search(nome_projeto + " github repository")
-            if resultados and "erro" not in resultados.lower():
-                urls_encontradas = re.findall(r'https?://github\.com/[\w./-]+', resultados)
-                if urls_encontradas:
-                    repo_url = urls_encontradas[0]
-                    notify(f"URL encontrada via busca: {repo_url}")
-        except Exception:
-            pass
-
-        return git_clone(repo_url)
-
-    # Fallback: busca na web e tenta download
+    # 1o: busca na web para encontrar a URL real
+    query = palavra_chave or "erp-next github"
+    notify(f"Buscando repositorio: {query}")
     try:
-        query = ultima_msg.replace("baixar", "").replace("download", "").replace("do", "").replace("da", "").strip()
-        notify(f"Buscando por: {query}")
+        resultados = web_search(query + " github repository")
+        if resultados and "erro" not in resultados.lower():
+            urls = re.findall(r'https?://github\.com/[\w./-]+', resultados)
+            if urls:
+                repo_url = urls[0]
+                notify(f"Repositorio encontrado: {repo_url}")
+    except Exception:
+        pass
+
+    if not repo_url and palavra_chave:
+        repo_url = f"https://github.com/{palavra_chave}/{palavra_chave}"
+
+    if repo_url:
+        notify(f"Clonando: {repo_url}")
+        args = [repo_url]
+        if output_dir:
+            args.append(output_dir)
+        resultado = git_clone(*args)
+        return resultado
+
+    # Fallback: tenta download de arquivo
+    try:
+        notify(f"Buscando arquivo: {query}")
         resultados = web_search(query)
         if resultados and "erro" not in resultados.lower():
-            urls_encontradas = re.findall(r'https?://[^\s]+', resultados)
-            for url in urls_encontradas:
+            urls = re.findall(r'https?://[^\s]+', resultados)
+            for url in urls:
                 if any(ext in url.lower() for ext in ['.zip', '.tar.gz', '.exe', '.msi', '.dmg', '.apk']):
-                    notify(f"Arquivo encontrado: {url}")
-                    return download_file(url)
-            if urls_encontradas:
-                notify(f"URL encontrada: {urls_encontradas[0]}")
-                return download_file(urls_encontradas[0])
-        return f"Nao foi possivel encontrar o arquivo automaticamente. Pesquise manualmente ou forneca a URL."
+                    notify(f"Arquivo: {url}")
+                    return download_file(url, output_dir)
+            if urls:
+                notify(f"URL: {urls[0]}")
+                return download_file(urls[0], output_dir)
+        return "Nao encontrei o repositorio automaticamente. Tente com a URL completa (ex: https://github.com/usuario/repo)."
     except Exception as e:
-        return f"Erro ao tentar download forcado: {e}"
+        return f"Erro no download forcado: {e}"
 
 
 def run_agent_turn(messages, model=MODEL, on_step=None):
@@ -3703,11 +3768,12 @@ def run_agent_turn(messages, model=MODEL, on_step=None):
     msg["timestamp"] = datetime.now().isoformat()
     messages.append(msg)
 
-    # Refusal override: se o modelo recusou um pedido de download, forcamos a acao
-    if not msg.get("tool_calls") and _is_refusal(msg.get("content", "")) and _is_download_request(messages):
-        notify("Modelo recusou, ativando override forcado de download...")
+    # Download override: se o modelo nao executou download e o usuario pediu, forcamos
+    if not msg.get("tool_calls") and _is_download_request(messages):
+        razao = "recusa" if _is_refusal(msg.get("content", "")) else "nenhuma ferramenta chamada"
+        notify(f"Override de download ativado ({razao})")
         resultado = _force_download(messages, notify)
-        msg["content"] = f"{msg['content']}\n\n[Override automatico ativado]\n\n{resultado}"
+        msg["content"] = f"{msg['content']}\n\n[Download automatico]\n\n{resultado}"
 
     while msg.get("tool_calls") and rounds < MAX_TOOL_ROUNDS:
         rounds += 1

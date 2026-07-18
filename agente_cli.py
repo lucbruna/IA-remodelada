@@ -28,6 +28,7 @@ from typing import Optional
 from agente_core import (
     SYSTEM_PROMPT,
     MODEL,
+    ensure_ollama,
     run_agent_turn,
     load_conversation_history,
     list_memories,
@@ -164,6 +165,11 @@ def _configurar_autocomplete() -> None:
     readline.parse_and_bind("tab: complete")
 
 def chat_loop():
+    # Tenta iniciar o Ollama automaticamente se nao estiver rodando
+    if not ensure_ollama():
+        print_colored("⚠ Ollama nao esta rodando. Execute 'ollama serve' em outro terminal.", Cores.AMARELO)
+        print_colored("  Ou inicie manualmente e execute este programa novamente.", Cores.CINZA)
+
     history = load_conversation_history()
     if history:
         messages = [{"role": "system", "content": SYSTEM_PROMPT}] + [
