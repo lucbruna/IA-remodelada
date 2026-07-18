@@ -1,0 +1,61 @@
+# ======================================================
+# Dependências do Agente Local — Turbo Edition
+# ======================================================
+# Instale com: pip install -r requirements.txt
+
+# Modelo de IA local (obrigatório)
+ollama>=0.4.0
+
+# Requisições HTTP para fetch_url (opcional, mas recomendado)
+requests>=2.31.0
+
+# Informações do sistema (CPU, memória, disco)
+psutil>=5.9.0
+
+# Leitura de PDFs
+PyPDF2>=3.0.0
+
+# OCR em imagens
+pillow>=10.0.0
+pytesseract>=0.3.10
+
+# --- TURBO / DASHBOARD ---
+# Terminal dashboard com gráficos
+rich>=13.0.0
+
+# Plugins avançados (web scraping, visualização, documentos, rede)
+beautifulsoup4>=4.12.0
+lxml>=5.0.0
+matplotlib>=3.8.0
+openpyxl>=3.1.0
+python-docx>=1.1.0
+mutagen>=1.47.0
+dnspython>=2.6.0
+whois>=0.9.0
+
+# --- OPCIONAIS (instale conforme necessidade) ---
+# Whisper para transcrição de áudio local
+# openai-whisper
+# sounddevice
+# soundfile
+
+# Formatação de código
+# autopep8
+# jsbeautifier
+
+# QR Code
+# qrcode[pil]
+
+# Markdown para HTML
+# markdown
+
+# Criptografia para cofre de senhas
+# cryptography
+
+# ChromaDB para busca vetorial na memória
+# chromadb
+# sentence-transformers
+
+# Servidor API REST
+# fastapi
+# uvicorn
