@@ -513,20 +513,42 @@ def delete_from_rag(doc_id: str) -> bool:
         return False
 
 
+# ─── Lazy Init Helper ────────────────────────────────────────────
+
+def _ensure_rag(prefer: str = "chromadb") -> bool:
+    """Inicializa RAG de forma lazy (só quando necessário).
+
+    Chamado automaticamente na primeira vez que uma ferramenta RAG é usada,
+    evitando bugs do ChromaDB no Windows durante import/registro.
+
+    Returns:
+        True se RAG está disponível
+    """
+    global RAG_AVAILABLE
+    if RAG_AVAILABLE:
+        return True
+    return init_rag(prefer)
+
+
 # ─── Registro do Plugin ────────────────────────────────────────────
 
 def register(api):
-    """Registra as ferramentas RAG no agente."""
+    """Registra as ferramentas RAG no agente.
 
-    # Inicializa RAG automaticamente ao registrar o plugin
-    init_rag()
+    NOTA: init_rag() NAO e chamado aqui para evitar bugs do ChromaDB no
+    Windows (panic no rust sqlite bindings). A inicializacao e feita lazy,
+    so quando o usuario realmente usa uma ferramenta RAG.
+    """
+    # NÃO inicializa RAG aqui - inicialização lazy (ver _ensure_rag())
 
     def ferramenta_rag_status() -> str:
         """Retorna o status do sistema RAG (ativo/inativo, documentos indexados, backend)."""
+        _ensure_rag()
         return rag_status()
 
     def ferramenta_rag_buscar(query: str, n_results: int = 3, filtros_json: str = "") -> str:
         """Busca documentos semanticamente similares no RAG."""
+        _ensure_rag()
         filtros = {}
         if filtros_json:
             try:
@@ -548,6 +570,7 @@ def register(api):
 
     def ferramenta_rag_indexar(texto: str, doc_id: str = "", metadata_json: str = "{}") -> str:
         """Indexa um texto no RAG para busca semântica futura."""
+        _ensure_rag()
         if not doc_id:
             import uuid
             doc_id = str(uuid.uuid4())[:8]
@@ -563,6 +586,7 @@ def register(api):
 
     def ferramenta_rag_limpar() -> str:
         """Remove todos os documentos do RAG."""
+        _ensure_rag()
         if clear_rag():
             return "✅ RAG limpo com sucesso."
         return "❌ Erro ao limpar RAG."
