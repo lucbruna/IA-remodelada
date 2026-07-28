@@ -452,7 +452,7 @@ def register(api):
         # Registrar as funções reais
         api.register_tool(
             name="safe_fine_tune_model",
-            func=safety_fine_tune_model,
+            func=safe_fine_tune_model,
             description="Executa fine-tuning seguro de um modelo de linguagem usando LoRA/QLoRA para eficiência",
             parameters={
                 "model_name": {"type": "string", "description": "Nome do modelo Hugging Face ou caminho local (ex: 'microsoft/Phi-3-mini-4k-instruct')"},

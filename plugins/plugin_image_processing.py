@@ -650,6 +650,7 @@ def create_thumbnail(image_path: str, size: Union[int, Tuple[int, int]] = (128, 
             # Create thumbnail
             if crop_to_fit:
                 # Crop to fit exactly (may crop parts of image)
+                from PIL import ImageOps
                 thumb_img = ImageOps.fit(img, thumb_size, Image.Resampling.LANCZOS)
             else:
                 # Fit within bounds (preserves aspect ratio, may have empty space)

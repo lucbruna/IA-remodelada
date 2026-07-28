@@ -21,6 +21,7 @@ COMO RODAR:
   python agente_gui.py
 """
 
+import os
 import threading
 import tkinter as tk
 from tkinter import scrolledtext, messagebox, ttk, filedialog, simpledialog

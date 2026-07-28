@@ -40,7 +40,7 @@ def _suavizacao_exponencial(dados: List[float], alpha: float = 0.3) -> List[floa
     resultado = [dados[0]]  # Primeiro valor é o mesmo
     for i in range(1, len(dados)):
         suavizado = alpha * dados[i] + (1 - alpha) * resultado[-1]
-        result.append(suavizado)
+        resultado.append(suavizado)
 
     return resultado
 

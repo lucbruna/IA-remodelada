@@ -17,6 +17,7 @@ PLUGIN_NAME = "Diff Preview System"
 
 import os
 import re
+import json
 import difflib
 import logging
 import shutil

@@ -14,6 +14,9 @@ from datetime import datetime
 __version__ = "1.0.0"
 PLUGIN_NAME = "Rede Avancada"
 
+# Diretorio de dados para downloads
+DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "agente_data")
+
 
 def register(api):
     def ping_host(host: str, contagem: int = 4) -> str:
