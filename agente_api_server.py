@@ -77,10 +77,10 @@ def _reset_stop_event(conv_id: str):
 # --- Schemas Pydantic ----------------------------------------------
 
 class ChatParams(BaseModel):
-    temperature: float = Field(default=0.5, ge=0.0, le=2.0)
+    temperature: float = Field(default=TEMPERATURE, ge=0.0, le=2.0)
     top_p: float = Field(default=0.9, ge=0.0, le=1.0)
     max_tokens: int = Field(default=4096, ge=64, le=32768)
-    num_ctx: int = Field(default=16384, ge=2048, le=131072)
+    num_ctx: int = Field(default=NUM_CTX, ge=2048, le=131072)
 
 class ChatRequest(BaseModel):
     message: str

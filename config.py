@@ -62,8 +62,11 @@ EMBEDDING_MODEL = os.environ.get("AGENTE_EMBEDDING_MODEL", "nomic-embed-text")
 WHISPER_MODEL = os.environ.get("AGENTE_WHISPER_MODEL", "whisper-large-v3")
 
 # ─── Qualidade de raciocínio ────────────────────────────────────────
-NUM_CTX = int(os.environ.get("AGENTE_NUM_CTX", "32768"))
-TEMPERATURE = float(os.environ.get("AGENTE_TEMPERATURE", "0.5"))
+# Otimizado para qwen2.5:7b em 16GB RAM (oficial Qwen docs)
+# num_ctx 8192: suficiente para código/chat, KV cache cabe em ~1.5GB RAM
+# temperature 0.6: equilíbrio entre criatividade e precisão
+NUM_CTX = int(os.environ.get("AGENTE_NUM_CTX", "8192"))
+TEMPERATURE = float(os.environ.get("AGENTE_TEMPERATURE", "0.6"))
 # Max tokens na resposta (0 = sem limite, usa padrao do modelo)
 MAX_TOKENS = int(os.environ.get("AGENTE_MAX_TOKENS", "4096"))
 

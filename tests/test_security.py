@@ -182,10 +182,10 @@ class TestSubprocessSafety:
         import platform
         from core.code_exec import run_command
         if platform.system() == "Windows":
-            result = run_command("ping -n 10 127.0.0.1", timeout=1)
+            result = run_command("ping -n 100 127.0.0.1", timeout=1)
         else:
             result = run_command("sleep 10", timeout=1)
-        assert any(kw in result.lower() for kw in ["timeout", "cancelado", "timed out", "erro"])
+        assert any(kw in result.lower() for kw in ["timeout", "cancelado", "timed out"])
 
     def test_process_kill_protection(self):
         from core.vcs_db_proc import process_kill

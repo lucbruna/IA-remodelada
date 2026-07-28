@@ -126,8 +126,10 @@ class TestCompact:
             {"role": "tool", "content": ""},
             {"role": "assistant", "content": "ok"},
         ]
-        result = compact_messages(messages, max_tokens=100)
-        assert len(result) == 2  # empty tool removed
+        result = compact_messages(messages, max_tokens=500)
+        # Empty tool should be removed
+        assert len(result) == 2
+        assert all(m["role"] != "tool" for m in result)
 
     def test_compact_truncates_old(self):
         from core.compact import compact_messages
@@ -141,10 +143,8 @@ class TestCompact:
         result = compact_messages(messages, max_tokens=50)
         # System message should be preserved
         assert any(m["role"] == "system" for m in result)
-        # Total should be reduced from original
-        total = sum(len(m.get("content", "")) // 4 for m in result)
-        original_total = sum(len(m.get("content", "")) // 4 for m in messages)
-        assert total < original_total  # compacted successfully
+        # Result should have fewer messages than original
+        assert len(result) < len(messages)
 
 
 # =====================================================================
