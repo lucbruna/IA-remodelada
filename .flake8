@@ -1,0 +1,79 @@
+# =============================================================================
+# Flake8 Configuration — IA Remodelada
+# =============================================================================
+# Configuracao para focar em erros reais e ignorar noise de star imports.
+#
+# Uso:
+#   flake8 .                    # usa este arquivo automaticamente
+#   flake8 . --select=E9,F63,F7,F82   # apenas erros criticos
+#   flake8 . --statistics        # resumo por tipo de erro
+
+[flake8]
+# Maximo de caracteres por linha
+max-line-length = 120
+
+# Complexidade ciclomatica maxima
+max-complexity = 15
+
+# Ignorar erros de style que nao afetam funcionamento
+ignore =
+    # Star imports do core/ — intencionais (re-exports)
+    F403,
+    F405,
+    # Linha muito longa — estilo, nao bug
+    E501,
+    # Import nao no topo — alguns modulos precisam de setup antes
+    E402,
+    # f-string sem placeholders — pode ser intencional
+    F541,
+    # Blank line com whitespace — cosmético
+    W291,
+    W292,
+    W293,
+    W391,
+    # Multiplos imports na mesma linha
+    E401,
+    # Statements na mesma linha
+    E701,
+    E702,
+    # Variable name ambiguo (e.g. 'l')
+    E741,
+    # Multiple spaces before keyword
+    E272,
+    # Too many blank lines
+    E303,
+    # Blank lines after class/function
+    E305,
+    # Blank line before nested definition
+    E306,
+    # Bare except
+    E722,
+    # Redefinicao de variavel (pode ser intencional)
+    F811,
+    # Import sombreado por loop variable
+    F402
+
+# Selecionar APENAS estes erros (override do ignore acima)
+# Se quiser rodar so erros criticos, use:
+#   flake8 . --select=E9,F63,F7,F82
+
+# Arquivos/diretorios para excluir
+exclude =
+    .git,
+    __pycache__,
+    venv,
+    .venv,
+    env,
+    .env,
+    build,
+    dist,
+    *.egg-info,
+    test_chroma,
+    .agents,
+    .github
+
+# Maximo de retornos por funcao
+max-returns = 6
+
+# Maximo de argumentos por funcao
+max-args = 10
