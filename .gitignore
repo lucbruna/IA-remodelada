@@ -33,4 +33,10 @@ agente_core_backup.py
 .env
 server_*.txt
 _commit_msg.txt
+server.pid
+
+# Modelos e dados binários (grandes)
+models/
+test_chroma/
+
 

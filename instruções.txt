@@ -1,4 +1,5 @@
  python agente_gui.py
+python agente_cli.py
 
 abrir_dashboard()
 

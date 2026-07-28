@@ -367,6 +367,7 @@ def run_agent_turn(messages, model=MODEL, on_step=None, on_token=None):
     messages = _apply_prompt_guard(messages, user_text_for_learning, notify)
 
     seen_calls = set()
+    func_call_counts = {}  # func_name -> count (detecta loops com args diferentes)
     rounds = 0
 
     try:
@@ -439,6 +440,16 @@ def run_agent_turn(messages, model=MODEL, on_step=None, on_token=None):
                         "Evite repetir e prossiga com outra abordagem ou finalize a resposta.]"
                     )
                 seen_calls.add(call_signature)
+
+                # Protecao contra loop: mesma funcao chamada muitas vezes com args diferentes
+                func_call_counts[func_name] = func_call_counts.get(func_name, 0) + 1
+                if func_call_counts[func_name] > 3:
+                    result = (
+                        f"{result}\n[AVISO CRITICO: voce ja chamou '{func_name}' "
+                        f"{func_call_counts[func_name]} vezes nesta conversa. "
+                        "PARE de chamar essa funcao e responda ao usuario com o que tem. "
+                        "Nao repita a mesma ferramenta com argumentos diferentes.]"
+                    )
 
                 notify(f"executando {func_name}({func_args})")
                 logging.info("Tool call: %s(%s) -> %s", func_name, func_args, str(result)[:200])

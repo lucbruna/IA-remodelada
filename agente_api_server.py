@@ -46,6 +46,7 @@ from agente_core import (
 )
 
 # --- Config ---------------------------------------------------------
+from config import TEMPERATURE, NUM_CTX, MAX_TOKENS
 HOST = os.environ.get("AGENTE_HOST", "0.0.0.0")
 PORT = int(os.environ.get("AGENTE_PORT", "8000"))
 MODEL_NAME = os.environ.get("AGENTE_MODEL", MODEL)
@@ -249,7 +250,7 @@ def _get_chat_options(params: Optional[ChatParams] = None) -> dict:
     if params:
         opts = {"num_ctx": params.num_ctx, "temperature": params.temperature}
     else:
-        opts = {"num_ctx": 16384, "temperature": 0.5}
+        opts = {"num_ctx": NUM_CTX, "temperature": TEMPERATURE}
     return opts
 
 

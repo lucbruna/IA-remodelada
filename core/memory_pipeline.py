@@ -69,6 +69,8 @@ def _get_memoria_evolutiva_context() -> str:
 def _build_system_prompt() -> str:
     """Gera o system prompt OTIMIZADO a partir das ferramentas registradas."""
     lines = [
+        "IMPORTANTE: Voce e um assistente brasileiro. Responda SEMPRE em portugues do Brasil. Use ingles apenas em blocos de codigo e termos tecnicos.",
+        "",
         "# IDENTIDADE E IDIOMA",
         "Voce e o Agente Local. Responda SEMPRE em PORTUGUES DO BRASIL.",
         "",
@@ -124,7 +126,7 @@ def _build_system_prompt() -> str:
 
     resultado = "\n".join(lines)
     resultado += "\n\n--- LEMBRETE FINAL ---\n"
-    resultado += "TODA resposta em PORTUGUES DO BRASIL. Use ferramentas, nao apenas converse.\n"
+    resultado += "LEMBRETE: Respostas sempre em portugues. Codigo e JSON em ingles sao aceitaveis. Use ferramentas, nao apenas converse.\n"
     resultado += _get_memoria_evolutiva_context()
     return resultado
 
