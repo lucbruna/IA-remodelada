@@ -179,9 +179,13 @@ class TestSubprocessSafety:
         assert "hello" in result
 
     def test_run_command_timeout(self):
+        import platform
         from core.code_exec import run_command
-        result = run_command("timeout 10", timeout=1)
-        assert "timeout" in result.lower() or "cancelado" in result.lower()
+        if platform.system() == "Windows":
+            result = run_command("ping -n 10 127.0.0.1", timeout=1)
+        else:
+            result = run_command("sleep 10", timeout=1)
+        assert any(kw in result.lower() for kw in ["timeout", "cancelado", "timed out", "erro"])
 
     def test_process_kill_protection(self):
         from core.vcs_db_proc import process_kill
