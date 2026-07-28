@@ -40,6 +40,62 @@ from agente_core import (
     list_plugins,
     reload_plugins,
 )
+from config import reload_config
+
+
+# ─── Modelos disponíveis ────────────────────────────────────────────
+def get_available_ollama_models() -> list:
+    """Lista todos os modelos disponíveis no Ollama local."""
+    try:
+        import ollama
+        response = ollama.list()
+        raw_models = response.get("models", []) if hasattr(response, "get") else getattr(response, "models", [])
+        models = []
+        for m in raw_models:
+            if hasattr(m, "model_dump"):
+                d = m.model_dump()
+            elif isinstance(m, dict):
+                d = m
+            else:
+                d = {}
+            name = d.get("name") or d.get("model") or "?"
+            size_bytes = d.get("size", 0) or 0
+            size_gb = size_bytes / (1024**3)
+            models.append({
+                "name": name,
+                "display": f"{name} ({size_gb:.1f} GB)" if size_gb > 0 else name,
+                "size_gb": size_gb,
+            })
+        models.sort(key=lambda x: x["size_gb"])
+        return models
+    except Exception:
+        return []
+
+
+def update_env_model(model_name: str) -> bool:
+    """Atualiza o modelo no arquivo .env."""
+    env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
+    lines = []
+    found = False
+
+    if os.path.exists(env_path):
+        with open(env_path, "r", encoding="utf-8") as f:
+            for line in f:
+                if line.strip().startswith("AGENTE_MODEL="):
+                    lines.append(f"AGENTE_MODEL={model_name}\n")
+                    found = True
+                else:
+                    lines.append(line)
+
+    if not found:
+        lines.insert(0, f"AGENTE_MODEL={model_name}\n")
+
+    with open(env_path, "w", encoding="utf-8") as f:
+        f.writelines(lines)
+
+    # Atualiza variável de ambiente em runtime
+    os.environ["AGENTE_MODEL"] = model_name
+    return True
 
 
 # ────────────────────────────────────────────────────────────────────
@@ -291,6 +347,7 @@ class AgenteGUI:
         self.busy = False
         self.message_count = 0
         self.start_time = time.time()
+        self._stream_start = None  # posição no chat_area durante streaming
 
         # Inicializa fonte (usa Segoe UI se disponível, senão Arial)
         global FONTE
@@ -411,6 +468,48 @@ class AgenteGUI:
             inner_toolbar, "💾  Salvar Histórico", self.save_conversation
         )
         self.save_btn.pack(side=tk.LEFT)
+
+        # Separador visual
+        tk.Frame(inner_toolbar, bg=Tema.BORDA, width=1, height=24).pack(
+            side=tk.LEFT, padx=(8, 8)
+        )
+
+        # Seletor de modelos
+        self.model_var = tk.StringVar(value=MODEL)
+        self.model_label = tk.Label(
+            inner_toolbar,
+            text="Modelo:",
+            font=(FONTE, 9),
+            fg=Tema.FG_SECONDARY,
+            bg=Tema.BG_TOOLBAR
+        )
+        self.model_label.pack(side=tk.LEFT, padx=(0, 4))
+
+        # Carrega modelos disponíveis
+        self.available_models = get_available_ollama_models()
+        model_names = [m["name"] for m in self.available_models] if self.available_models else [MODEL]
+
+        self.model_combo = ttk.Combobox(
+            inner_toolbar,
+            textvariable=self.model_var,
+            values=model_names,
+            state="readonly",
+            width=20,
+            font=(FONTE, 9)
+        )
+        self.model_combo.pack(side=tk.LEFT, padx=(0, 6))
+
+        # Estilizar combobox para tema escuro
+        style = ttk.Style()
+        style.theme_use('clam')
+        style.configure("Dark.TCombobox",
+                        fieldbackground=Tema.BG_INPUT,
+                        background=Tema.BG_INPUT,
+                        foreground=Tema.FG_PRIMARY,
+                        selectbackground=Tema.BG_INPUT,
+                        selectforeground=Tema.FG_PRIMARY)
+
+        self.model_combo.bind("<<ComboboxSelected>>", self._on_model_change)
 
         # Estatísticas
         self.stats_label = tk.Label(
@@ -578,14 +677,19 @@ class AgenteGUI:
             self._placeholder_ativo = False
 
     def _on_focus_out(self, event=None):
-        """Reinsere o placeholder se o campo estiver vazio."""
-        if not self.text_input.get("1.0", tk.END).strip():
+        """Reinsere o placeholder se o campo estiver vazio e não estiver processando."""
+        if self.busy:
+            return
+        conteudo = self.text_input.get("1.0", "end-1c").strip()
+        if not conteudo:
             self._inserir_placeholder()
             self._placeholder_ativo = True
 
     def _on_key_release(self, event=None):
         """Atualiza placeholder e redimensiona o campo de texto."""
-        conteudo = self.text_input.get("1.0", tk.END).strip()
+        if self.busy:
+            return
+        conteudo = self.text_input.get("1.0", "end-1c").strip()
 
         if not conteudo and not self._placeholder_ativo:
             self._inserir_placeholder()
@@ -621,6 +725,15 @@ class AgenteGUI:
         # Scroll suave para o final
         self.chat_area.see(tk.END)
 
+    def _on_model_change(self, event=None):
+        """Chamado quando o modelo é alterado no seletor."""
+        new_model = self.model_var.get()
+        if new_model and new_model != MODEL:
+            if update_env_model(new_model):
+                self._append("Sistema", f"Modelo alterado para: {new_model}. Reinicie para aplicar完全.", "system")
+                # Atualiza o título da janela
+                self.root.title(f"Agente Local ({new_model})")
+
     def _update_stats(self):
         """Atualizar estatísticas da conversa."""
         runtime = int(time.time() - self.start_time)
@@ -640,18 +753,20 @@ class AgenteGUI:
         if self.busy:
             return
 
+        # Lê o conteúdo e remove placeholder se estiver ativo
+        raw = self.text_input.get("1.0", "end-1c")
+        user_text = raw.strip()
         if self._placeholder_ativo:
-            return
-
-        user_text = self.text_input.get("1.0", tk.END).strip()
+            user_text = ""
         if not user_text:
             return
 
-        # Limpar campo
-        self.text_input.delete("1.0", tk.END)
-        self.text_input.configure(height=2)
-        self._placeholder_ativo = False
-        self.text_input.focus()
+        # Limpar campo IMEDIATAMENTE antes de qualquer outra coisa
+        self._placeholder_ativo = True
+        self.text_input.delete("1.0", "end")
+        self.text_input.configure(height=2, fg=Tema.FG_SECONDARY)
+        self._inserir_placeholder()
+        self._placeholder_ativo = True
 
         self.message_count += 1
         self._append("Você", user_text, "user")
@@ -701,27 +816,68 @@ class AgenteGUI:
             self.root.after(0, lambda: self._append("⚙  Passo", text, "step", timestamp=True))
             self.root.after(0, lambda: self.status_label.config(text=text))
 
+        # Streaming: atualiza a resposta do agente token a token.
+        reply_buffer = {"text": ""}
+        reply_started = {"done": False}
+
+        def on_token(token):
+            reply_buffer["text"] += token
+            if not reply_started["done"]:
+                reply_started["done"] = True
+                self.root.after(0, self._begin_streamed_reply)
+            self.root.after(0, self._update_streamed_reply, reply_buffer["text"])
+
         try:
             self.messages.append({
                 "role": "user",
                 "content": user_text,
                 "timestamp": datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
             })
-            self.messages = run_agent_turn(self.messages, model=MODEL, on_step=on_step)
+            self.messages = run_agent_turn(
+                self.messages, model=self.model_var.get(), on_step=on_step, on_token=on_token
+            )
 
-            reply = ""
-            for m in reversed(self.messages):
-                if m.get("role") == "assistant" and m.get("content"):
-                    reply = m["content"]
-                    break
+            reply = reply_buffer["text"]
+            if not reply:
+                for m in reversed(self.messages):
+                    if m.get("role") == "assistant" and m.get("content"):
+                        reply = m["content"]
+                        break
 
             self.root.after(0, self._show_reply, reply)
         except Exception as e:
             self.root.after(0, self._show_error, str(e))
 
+    def _begin_streamed_reply(self):
+        """Inicia a resposta do agente em modo streaming no chat_area."""
+        self.chat_area.configure(state="normal")
+        time_str = datetime.now().strftime("%H:%M")
+        self.chat_area.insert(tk.END, f"[{time_str}] ", "timestamp")
+        self.chat_area.insert(tk.END, "Agente: ", "bold")
+        self._stream_start = self.chat_area.index("end-1c")
+        self.chat_area.configure(state="disabled")
+        self.chat_area.see(tk.END)
+
+    def _update_streamed_reply(self, text):
+        """Atualiza a resposta do agente durante o streaming."""
+        self.chat_area.configure(state="normal")
+        try:
+            # Substitui tudo a partir do início da resposta streamada.
+            self.chat_area.delete(self._stream_start, "end-1c")
+            self.chat_area.insert(tk.END, f"{text}\n\n", "agent")
+        except Exception:
+            pass
+        self.chat_area.configure(state="disabled")
+        self.chat_area.see(tk.END)
+
     def _show_reply(self, reply):
-        """Mostrar resposta do agente."""
-        self._append("Agente", reply or "(sem resposta)", "agent")
+        """Mostrar resposta do agente (modo streaming ou bloco)."""
+        if getattr(self, "_stream_start", None) is not None:
+            # Finaliza o streaming garantindo o texto completo.
+            self._update_streamed_reply(reply or "(sem resposta)")
+            self._stream_start = None
+        else:
+            self._append("Agente", reply or "(sem resposta)", "agent")
         self._restore_ui()
 
     def _show_error(self, error_text):
@@ -742,6 +898,11 @@ class AgenteGUI:
         self.status_indicator.config(fg=Tema.SUCCESS_FG)
         self.status_label.config(text="Pronto.")
         self.pensando_label.config(text="")
+        # Reseta o campo de texto para o estado inicial com placeholder
+        self.text_input.delete("1.0", "end")
+        self.text_input.configure(height=2, fg=Tema.FG_SECONDARY)
+        self._inserir_placeholder()
+        self._placeholder_ativo = True
         self.text_input.focus()
         self._update_stats()
 

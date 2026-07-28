@@ -49,7 +49,10 @@ VECTOR_DIR = os.path.join(PLUGIN_DATA_DIR, "chroma_db")
 _COLLECTION_NAME = "memoria_vetorial"
 _USE_VECTOR_SEARCH = True  # ativa busca vetorial
 
-_ollama_model = "llama3.1"
+try:
+    from config import MODEL as _ollama_model
+except Exception:
+    _ollama_model = "qwen2.5:1.5b"
 _api = None  # setado pelo register()
 _chroma_client = None
 _chroma_collection = None

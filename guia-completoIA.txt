@@ -1,0 +1,156 @@
+GUIA COMPLETO — IA REMODELADA
+COMO ABRIR
+# 1. Navegue ate o diretorio do projeto
+cd "E:\IA remodelada"
+
+# 2. Instale dependencias
+pip install -r requirements.txt
+
+# 3. Instale o modelo de IA (Ollama)
+ollama pull qwen2.5:7b
+
+# 4. Inicie o programa (escolha uma interface):
+
+python agente_cli.py           # Terminal (recomendado para comecar)
+python agente_gui.py           # Janela grafica (Tkinter)
+python agente_streamlit.py     # Interface web (Streamlit)
+python agente_api_server.py    # Servidor REST API
+python agente_dashboard.py     # Dashboard Rich no terminal
+CAPACIDADES POR INTERFACE
+1. TERMINAL (agente_cli.py)
+Voce digita comandos, o agente responde e executa ferramentas.
+
+Exemplos:
+> Analise o codigo do arquivo main.py
+> Crie uma funcao em Python que calcule fibonacci
+> Deploy o projeto em Docker
+> Compare os modelos qwen2.5:7b e llama3.2:3b
+> Crie um PR para a issue #42
+> Busque por "database" no codebase inteiro
+2. GUI (agente_gui.py)
+Janela com caixa de mensagem e area de resposta.
+Botao para historico, configuracoes e limpar tela.
+3. STREAMLIT (agente_streamlit.py)
+Interface web moderna no navegador.
+Suporta upload de imagens, historico, configuracoes.
+Acesse: http://localhost:8501
+4. API (agente_api_server.py)
+Servidor REST para integracao com outros sistemas.
+Documentacao interativa: http://localhost:8000/docs
+Endpoints principais:
+  POST /chat          - Enviar mensagem
+  POST /chat/stream   - Streaming SSE
+  GET  /health        - Health check
+  GET  /plugins       - Lista plugins
+  GET  /models        - Modelos disponiveis
+72 PLUGINS — O QUE CADA UM FAZ
+INTEGRACOES EXTERNAS
+Plugin	O que faz
+plugin_github.py	Gerencia repos, issues, PRs, busca codigo no GitHub
+plugin_brave_search.py	Busca na web, noticias, imagens
+plugin_slack.py	Envia notificacoes para Slack, Teams, Discord
+plugin_firecrawl.py	Web scraping avancado, crawl, interacao com paginas
+plugin_playwright.py	Automacao de browser (screenshots, cliques, formularios)
+plugin_mcp.py	Conecta a centenas de ferramentas via Model Context Protocol
+AUTOMACAO E DEPLOY
+Plugin	O que faz
+plugin_issue_to_pr.py	Le issue → cria branch → abre PR automaticamente
+plugin_auto_deploy.py	Build Docker, deploy K8s, health checks, rollback
+plugin_background_agents.py	Agentes rodando em background com monitoramento
+plugin_kanban.py	Board visual Kanban para gerenciar tarefas
+DESENVOLVIMENTO
+Plugin	O que faz
+plugin_code_review.py	Revisao rapida: bugs, seguranca, performance
+plugin_code_search.py	Busca semantica por funcoes, classes, simbolos
+plugin_debugger.py	Breakpoints, step-through, inspecao de variaveis
+plugin_multi_file_refactor.py	Renomear, mover, extrair funcoes entre arquivos
+plugin_project_config.py	Config customizada por projeto (tipo .cursorrules)
+plugin_diff_preview.py	Preview de mudancas antes de aplicar, backup, rollback
+IA E MODELOS
+Plugin	O que faz
+plugin_model_evals.py	Compara modelos lado a lado, benchmark, recomendacao
+plugin_ab_testing.py	Experimentos A/B entre modelos
+plugin_prompt_hub.py	Versionamento de prompts (como Git)
+plugin_crewai.py	Orquestracao multi-agente
+plugin_mem0.py	Memoria universal (lembra entre sessoes)
+DADOS E DOCUMENTOS
+Plugin	O que faz
+plugin_rag.py	Busca semantica em documentos (RAG)
+plugin_documentos.py	Leitura de PDF, DOCX, XLSX, CSV
+plugin_banco_dados.py	Consultas em bancos SQLite/PostgreSQL
+plugin_analytics.py	Analise de dados e metricas
+plugin_visualizacao.py	Geracao de graficos matplotlib
+plugin_ciencia_dados.py	Pipelines de dados
+IMAGEM E AUDIO
+Plugin	O que faz
+plugin_image_processing.py	OCR, redimensionamento, filtros, comparacao
+plugin_tts.py	Text-to-speech
+plugin_audio_avancado.py	Conversao, transcricao, metadados
+plugin_media_geracao.py	Geracao de imagens (FLUX) e videos
+SEGURANCA E REDE
+Plugin	O que faz
+plugin_seguranca.py	Hash, criptografia, varredura
+plugin_rede_avancada.py	Ping, DNS, port scan, WHOIS
+plugin_clima.py	Consulta tempo real
+plugin_crypto.py	Criptografia de dados
+plugin_wttr_in.py	Previsao do tempo
+SISTEMA E UTILITARIOS
+Plugin	O que faz
+plugin_backup.py	Backup e restauracao
+plugin_sandbox.py	Execucao isolada em Docker
+plugin_executor_autonomo.py	Geracao de projetos completos
+plugin_orquestrador.py	Orquestracao de workflows
+plugin_subagentes.py	Delegacao para sub-agentes especializados
+plugin_auto_evolucao.py	Auto-melhoria controlada
+EXEMPLOS REAIS DE USO
+Desenvolvimento Web
+"Crie uma API REST em FastAPI com endpoints de CRUD para usuarios"
+"Implemente autenticacao JWT no endpoint /login"
+"Escreva testes unitarios para a funcao validate_email"
+"Refatore a classe UserDAO para usar SQLAlchemy async"
+DevOps
+"Build a imagem Docker do projeto"
+"Deploy em Kubernetes usando o manifest k8s/deployment.yaml"
+"Verifique se o servico esta saudavel em http://localhost:8000/health"
+"Faca rollback para a versao anterior"
+Analise de Codigo
+"Busque por todas as funcoes que usam eval() no projeto"
+"Analise a seguranca do arquivo auth.py"
+"Compare os modelos qwen2.5:7b e llama3.2:3b neste prompt"
+"Quais funcoes tem mais de 100 linhas?"
+Gestao de Projetos
+"Crie uma issue no GitHub com titulo 'Adicionar rate limiting'"
+"Gere um PR automatico para a issue #15"
+"Mova o card 'auth-module' de 'in_progress' para 'review'"
+"Exporte o board Kanban como HTML"
+Automacao
+"Execute este script em background e notifique quando terminar"
+"Crie um agente que monitore o site a cada 5 minutos"
+"Envie um resumo diario no Slack"
+"Compare A/B os modelos gpt-4o e claude-3 no prompt X"
+COMANDOS UTEIS NO TERMINAL
+Comando	Descricao
+/help	Lista de comandos
+/clear	Limpa historico
+/plugins	Lista plugins carregados
+/models	Modelos Ollama disponiveis
+/memory	Mostra memorias salvas
+/export	Exporta conversa
+INTEGRACAO COM CI/CD
+# Exemplo: GitHub Actions
+- name: Run IA Remodelada
+  run: |
+    pip install -r requirements.txt
+    python -c "from plugins.plugin_code_review import code_review; print(code_review(open('diff.patch').read(), 'diff'))"
+O QUE O SISTEMA ENTREGA NESTE ESTADO
+Entregavel	Descricao
+72 plugins funcionais	Ferramentas para todas as areas
+~462 ferramentas	Capacidades de automacao completas
+4 interfaces	CLI, GUI, Web, API
+Memoria persistente	Lembra entre sessoes
+RAG integrado	Busca semantica em documentos
+Multi-modelo	Ollama, OpenAI, Anthropic, Gemini
+Deploy completo	Docker, Kubernetes, Cloud
+Seguranca	Auth, rate limiting, sandbox
+Monitoramento	Logs, metricas, health checks
+Documentacao automatica	README atualizado

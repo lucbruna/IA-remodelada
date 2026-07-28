@@ -1,0 +1,99 @@
+name: Quality Gate
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint-and-security:
+    name: "Lint + Security Scan"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8 bandit safety
+
+      - name: Flake8 (syntax errors)
+        run: |
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+
+      - name: Flake8 (style warnings)
+        run: |
+          flake8 . --count --exit-zero --max-complexity=15 --max-line-length=120 --statistics
+
+      - name: Bandit (security scan)
+        run: |
+          bandit -r core/ plugins/ -x venv,__pycache__,tests -ll --format json -o bandit-report.json || true
+          bandit -r core/ plugins/ -x venv,__pycache__,tests -ll
+
+      - name: Safety (dependency vulnerabilities)
+        run: |
+          safety check --json --output safety-report.json || true
+        continue-on-error: true
+
+      - name: Upload security reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-reports
+          path: |
+            bandit-report.json
+            safety-report.json
+          retention-days: 7
+
+  type-check:
+    name: "Type Check (pyright)"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyright
+          pip install -r requirements.txt
+
+      - name: Run pyright
+        run: |
+          pyright --pythonversion 3.11 core/ || true
+        continue-on-error: true
+
+  syntax-validation:
+    name: "Syntax Validation"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Validate all Python files compile
+        run: |
+          python -c "
+          import ast, glob, sys
+          errors = []
+          for f in glob.glob('**/*.py', recursive=True):
+              if '__pycache__' in f or 'venv' in f:
+                  continue
+              try:
+                  ast.parse(open(f).read())
+              except SyntaxError as e:
+                  errors.append(f'{f}: {e}')
+          if errors:
+              for e in errors:
+                  print(f'ERROR: {e}')
+              sys.exit(1)
+          print(f'All Python files have valid syntax')
+          "

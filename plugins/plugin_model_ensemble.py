@@ -25,8 +25,11 @@ except ImportError:
 __version__ = "1.0.0"
 PLUGIN_NAME = "Ensemble de Modelos de Linguagem"
 
-# Modelo padrão do sistema (deve coincidir com agente_core.py)
-DEFAULT_MODEL = "qwen2.5:1.5b"
+# Modelo padrão do sistema — vem da configuração central (config.py / agente_core).
+try:
+    from config import MODEL as DEFAULT_MODEL
+except Exception:
+    DEFAULT_MODEL = "qwen2.5:1.5b"
 
 
 def _check_ollama_availability() -> tuple[bool, str]:

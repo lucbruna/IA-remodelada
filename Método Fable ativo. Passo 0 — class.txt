@@ -1,0 +1,7 @@
+Método Fable ativo. Passo 0 — classificar: você usou o gatilho /fable-method sem tarefa. Isso é plano-primeiro (escopo ambíguo).
+O método oferece 3 subcomandos + o loop padrão:
+Comando	O que faz
+/fable-method plan <tarefa>	Passos 0-3: classificar, definir pronto, evidências, plano. Pare e aguarde.
+/fable-method audit	Avalia trabalho já feito na conversa contra o loop (seguido/pulado/falsificado)
+/fable-method report	Reescreve a última resposta com conclusão primeiro + ressalvas honestas
+/fable-method <tarefa>	Loop completo: 0→1→2→3→4→5→6

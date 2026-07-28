@@ -1,0 +1,95 @@
+# =============================================================================
+# docker-compose.yml — Agente Local + Ollama
+# =============================================================================
+# Uso:
+#   docker compose up -d                    # Iniciar tudo
+#   docker compose logs -f                  # Ver logs
+#   docker compose down                     # Parar tudo
+#   docker compose exec ollama ollama pull llama3.2  # Baixar modelo
+#   docker compose exec app python -m pytest -v       # Rodar testes
+# =============================================================================
+
+services:
+
+  # ─── Servidor API do Agente ─────────────────────────────────────────────
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: agente-local
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - AGENTE_HOST=0.0.0.0
+      - AGENTE_PORT=8000
+      - AGENTE_MODEL=${AGENTE_MODEL:-llama3.2}
+      - OLLAMA_HOST=http://ollama:11434
+      - PYTHONIOENCODING=utf-8
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - agente_data:/app/agente_data
+      - ./plugins:/app/plugins
+    depends_on:
+      ollama:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-s", "-o", "/dev/null", "-w", "%{http_code}", "http://localhost:8000/"]
+      interval: 30s
+      timeout: 10s
+      start_period: 40s
+      retries: 5
+    networks:
+      - agente_net
+
+  # ─── Ollama (Modelos de IA locais) ─────────────────────────────────────
+  ollama:
+    image: ollama/ollama:latest
+    container_name: agente-ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_models:/root/.ollama
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+      - OLLAMA_KEEP_ALIVE=5m
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 15s
+      timeout: 5s
+      start_period: 20s
+      retries: 10
+    networks:
+      - agente_net
+
+  # ─── Interface Web Open WebUI ──────────────────────────────────────
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: agente-webui
+    restart: unless-stopped
+    ports:
+      - "3000:8080"
+    volumes:
+      - openwebui_data:/app/backend/data
+    environment:
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - WEBUI_SECRET_KEY=${WEBUI_SECRET_KEY:-change-me-in-production}
+    depends_on:
+      ollama:
+        condition: service_healthy
+    networks:
+      - agente_net
+
+volumes:
+  agente_data:
+    name: agente_local_data
+  ollama_models:
+    name: agente_ollama_models
+  openwebui_data:
+    name: agente_openwebui_data
+
+networks:
+  agente_net:
+    name: agente_local_network
+    driver: bridge

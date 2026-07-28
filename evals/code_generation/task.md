@@ -1,0 +1,1 @@
+Gere uma função Python que calcule o n-ésimo número de Fibonacci usando recursão com memoização. A função deve se chamar `fib_memo` e receber um inteiro `n` como argumento. Retorne o n-ésimo número de Fibonacci.

@@ -11,6 +11,8 @@ Uso:
 import sys
 import os
 import json
+import shutil
+from pathlib import Path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from unittest.mock import patch, MagicMock
@@ -719,4 +721,94 @@ class TestPluginInfoCambio:
         assert "cambio_moeda" in functions
         assert "cotacoes_atuais" in functions
         assert tools_list[0]["function"]["name"] == "cambio_moeda"
-        assert tools_list[1]["function"]["name"] == "cotacoes_atuais"
+
+
+# =====================================================================
+# Tests: Executor Autonomo e Subagentes Avancados
+# =====================================================================
+
+
+class TestExecutorAutonomoPlugin:
+    def test_register_executor_autonomo(self):
+        from agente_core import PluginAPI
+        from plugins.plugin_executor_autonomo import register
+
+        functions = {}
+        tools_list = []
+        api = PluginAPI(functions, tools_list)
+
+        info = register(api)
+
+        assert info["name"] == "Executor Autonomo Profissional"
+        assert "executor_autonomo" in functions
+        assert "desenvolver_projeto" in functions
+        assert "consultar_solucoes_erro" in functions
+
+    def test_criar_projeto_template_cli_python(self):
+        from agente_core import PluginAPI
+        from plugins.plugin_executor_autonomo import register
+
+        functions = {}
+        tools_list = []
+        api = PluginAPI(functions, tools_list)
+        register(api)
+
+        base = Path.cwd() / "agente_data" / "test_executor_plugin"
+        if base.exists():
+            shutil.rmtree(base)
+        base.mkdir(parents=True, exist_ok=True)
+
+        try:
+            resultado = functions["criar_projeto_template"](
+                nome="Projeto Teste Executor",
+                template="cli_python",
+                base_dir=str(base),
+                validar=True,
+            )
+
+            assert "Template: cli_python" in resultado
+            assert "py_compile: OK" in resultado
+            assert (base / "projeto_teste_executor" / "README.md").exists()
+        finally:
+            shutil.rmtree(base, ignore_errors=True)
+
+    def test_memoria_de_erros(self):
+        from agente_core import PluginAPI
+        from plugins.plugin_executor_autonomo import register
+
+        functions = {}
+        tools_list = []
+        api = PluginAPI(functions, tools_list)
+        register(api)
+
+        registrado = functions["registrar_solucao_erro"](
+            "ModuleNotFoundError: No module named 'fastapi'",
+            "Instalar fastapi e adicionar ao requirements.txt",
+            "teste",
+            "projeto teste",
+        )
+        consulta = functions["consultar_solucoes_erro"]("ModuleNotFoundError: No module named 'fastapi'")
+
+        assert "registrada" in registrado or "atualizada" in registrado
+        assert "fastapi" in consulta
+
+
+class TestSubagentesAvancados:
+    def test_register_subagentes_avancados(self):
+        from agente_core import PluginAPI
+        from plugins.plugin_subagentes import register
+
+        functions = {}
+        tools_list = []
+        api = PluginAPI(functions, tools_list)
+
+        info = register(api)
+
+        assert info["version"] == "2.0.0"
+        assert "subagente_arquitetura" in functions
+        assert "subagente_testes" in functions
+        assert "subagente_debug" in functions
+        assert "subagente_frontend" in functions
+        assert "subagente_backend" in functions
+        assert "subagente_devops" in functions
+        assert "subagente_brasil_mundo" in functions

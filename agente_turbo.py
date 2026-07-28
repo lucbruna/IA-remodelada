@@ -29,7 +29,105 @@ TURBO_CACHE_TTL = 3600
 TURBO_PARALLEL_MAX_WORKERS = 4
 TURBO_MAX_RETRY_STRATEGIES = 3
 
+# Cache semântico de respostas (por similaridade de embedding).
+# Evita recomputar respostas para perguntas quase idênticas.
+TURBO_SEMANTIC_CACHE_ENABLED = True
+TURBO_SEMANTIC_SIMILARITY_THRESHOLD = 0.92  # 1.0 = idêntico
+TURBO_EMBEDDING_MODEL = "nomic-embed-text"
+
 _logger = logging.getLogger("agente_turbo")
+
+_SEMANTIC_CACHE_FILE = os.path.join(TURBO_CACHE_DIR, "semantic_cache.json")
+_semantic_cache_lock = threading.Lock()
+
+
+def _load_semantic_cache() -> list:
+    if not os.path.exists(_SEMANTIC_CACHE_FILE):
+        return []
+    try:
+        with open(_SEMANTIC_CACHE_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return []
+
+
+def _save_semantic_cache(data: list) -> None:
+    try:
+        with open(_SEMANTIC_CACHE_FILE, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+    except Exception:
+        pass
+
+
+def _embed(text: str):
+    """Gera embedding via Ollama. Retorna lista ou None se indisponível."""
+    try:
+        import ollama
+        resp = ollama.embeddings(model=TURBO_EMBEDDING_MODEL, prompt=text)
+        return resp.get("embedding")
+    except Exception as e:
+        _logger.debug("Embedding indisponível: %s", e)
+        return None
+
+
+def _cosine_similarity(a, b) -> float:
+    if not a or not b or len(a) != len(b):
+        return 0.0
+    dot = sum(x * y for x, y in zip(a, b))
+    na = sum(x * x for x in a) ** 0.5
+    nb = sum(y * y for y in b) ** 0.5
+    if na == 0 or nb == 0:
+        return 0.0
+    return dot / (na * nb)
+
+
+def semantic_cache_get(query: str):
+    """Retorna a resposta cacheada se houver pergunta semanticamente igual.
+
+    Returns:
+        str (resposta) ou None.
+    """
+    if not TURBO_SEMANTIC_CACHE_ENABLED:
+        return None
+    vec = _embed(query)
+    if vec is None:
+        return None
+    with _semantic_cache_lock:
+        cache = _load_semantic_cache()
+        best = None
+        best_sim = 0.0
+        for item in cache:
+            sim = _cosine_similarity(vec, item.get("vec"))
+            if sim > best_sim:
+                best_sim = sim
+                best = item
+        if best and best_sim >= TURBO_SEMANTIC_SIMILARITY_THRESHOLD:
+            _logger.info("Cache semântico HIT (sim=%.3f): %s", best_sim, query[:40])
+            return best.get("response")
+    return None
+
+
+def semantic_cache_set(query: str, response: str) -> None:
+    """Armazena uma resposta no cache semântico."""
+    if not TURBO_SEMANTIC_CACHE_ENABLED:
+        return
+    vec = _embed(query)
+    if vec is None:
+        return
+    with _semantic_cache_lock:
+        cache = _load_semantic_cache()
+        # Atualiza se já existir query idêntica (mesmo embedding).
+        cache.append({
+            "query": query,
+            "response": response,
+            "vec": vec,
+            "ts": time.time(),
+        })
+        # Limita o tamanho do cache (mantém os 500 mais recentes).
+        if len(cache) > 500:
+            cache = cache[-500:]
+        _save_semantic_cache(cache)
+
 
 
 # ===================================================================

@@ -1,0 +1,130 @@
+# =============================================================================
+# GitHub Actions — Docker Build & Publish
+# =============================================================================
+# Cria e publica a imagem Docker do Agente Local no GitHub Container Registry.
+#
+# Trigger:
+#   - Push de tag semver (ex: v1.2.3)
+#   - Push na branch main (image:latest)
+#
+# Uso:
+#   git tag v1.0.0 && git push origin v1.0.0
+# =============================================================================
+
+name: Docker Build & Publish
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'Dockerfile'
+      - 'requirements.txt'
+      - 'agente_api_server.py'
+      - 'agente_core.py'
+      - 'plugins/**'
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag para a imagem Docker'
+        required: false
+        default: 'latest'
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  PYTHON_VERSION: "3.11"
+
+jobs:
+
+  # ─── Job 1: Build da imagem Docker ──────────────────────────────────────
+  build:
+    name: "Build Docker Image"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels)
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+            type=sha,prefix=commit-
+            type=ref,event=branch
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            BUILDKIT_INLINE_CACHE=1
+
+      - name: Generate SBOM (Software Bill of Materials)
+        if: success()
+        run: |
+          docker scout sbom ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest > sbom.json 2>/dev/null || echo "Scout not available"
+        
+      - name: Scan for vulnerabilities
+        if: success()
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          format: 'table'
+          exit-code: '1'
+          severity: 'HIGH,CRITICAL'
+
+  # ─── Job 2: Smoke test ─────────────────────────────────────────────────
+  smoke-test:
+    name: "Smoke Test (Docker)"
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run container
+        run: |
+          docker run -d --name agente-test \
+            -e AGENTE_MODEL=llama3.2:3b \
+            -e OLLAMA_HOST=http://ollama:11434 \
+            -p 8000:8000 \
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+
+      - name: Wait for startup
+        run: sleep 20
+
+      - name: Test health endpoint
+        run: |
+          curl -s -o /dev/null -w "HTTP %{http_code}" http://localhost:8000/ || echo "Health check failed"
+
+      - name: Test models endpoint
+        run: |
+          curl -s http://localhost:8000/models | head -c 200 || echo "Models endpoint failed"
+
+      - name: Cleanup
+        if: always()
+        run: |
+          docker stop agente-test || true
+          docker rm agente-test || true

@@ -78,6 +78,9 @@ from agente_core import (
     _load_json,
     _save_json,
     _execute_tool_call,
+    autonomia_planejar,
+    autonomia_status,
+    _autonomous_context_for_turn,
     # Loop do agente
     run_agent_turn,
     _chat_with_retries,
@@ -1146,6 +1149,35 @@ class TestReadImageText:
 
         assert "Instale" in resultado
         assert "pillow" in resultado or "pytesseract" in resultado
+
+
+# =====================================================================
+# Tests: Inteligencia Autonoma
+# =====================================================================
+
+
+class TestInteligenciaAutonoma:
+    def test_autonomia_planejar_codigo(self):
+        resultado = autonomia_planejar("Analise este projeto Python, corrija bugs e rode pytest")
+        assert "codigo" in resultado
+        assert "subagente_codigo" in resultado
+        assert "code_review" in resultado
+
+    def test_autonomia_planejar_brasil_mundo(self):
+        resultado = autonomia_planejar("Quais noticias atuais do Brasil e do mundo sobre economia?")
+        assert "brasil_mundo" in resultado
+        assert "contexto" not in resultado.lower() or "Ferramentas recomendadas" in resultado
+        assert "buscar_noticias" in resultado or "noticias_do_momento" in resultado
+
+    def test_contexto_autonomo_nao_vazio(self):
+        messages = [{"role": "user", "content": "Melhore este codigo Python e delegue as responsabilidades"}]
+        contexto = _autonomous_context_for_turn(messages)
+        assert "Plano Autonomo" in contexto
+        assert "Politica de Codigo" in contexto
+
+    def test_autonomia_status_formato(self):
+        resultado = autonomia_status()
+        assert "Status da Inteligencia Autonoma" in resultado
 
 
 # =====================================================================

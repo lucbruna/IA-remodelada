@@ -1,0 +1,59 @@
+ python agente_gui.py
+
+abrir_dashboard()
+
+streamlit run agente_streamlit.py
+python agente_api_server.py
+# Acesse: http://localhost:8000
+
+
+Skill i-have-adhd instalada em .agents/skills/i-have-adhd/.
+Ativar
+Digite /i-have-adhd nesta sessão para ativar as regras.
+
+┌────────────────────────────────────────────────────────┐
+  │          Comando          │                         Função                         │
+  ├───────────────────────────┼────────────────────────────────────────────────────────┤
+  │ /auto_evolve              │ Executa um ciclo manual de auto-evolução               │
+  ├───────────────────────────┼────────────────────────────────────────────────────────┤
+  │ /get_evolution_status     │ Mostra status completo do sistema de evolução          │
+  ├───────────────────────────┼────────────────────────────────────────────────────────┤
+  │ /get_optimized_parameters │ Visualiza parâmetros atualmente otimizados             │
+  ├───────────────────────────┼────────────────────────────────────────────────────────┤
+  │ /run_experiment           │ Cria e executa experimentos controlados personalizados │
+  └───────────────────────────┴──────────────────────────────────────────────────────
+Agente » Eu instalei vários tipos de funções para ajudar você. Algumas delas são:
+
+- Para obter o status de um job: `get_job_status`
+- Para obter o resultado de um job concluído: `get_job_result`
+- Para cancelar um job pendente ou em processamento: `cancel_job`
+- Para listar todos os jobs com filtro por status: `list_jobs`
+- Para iniciar o gerenciador de jobs com número especificado de workers: `start_job_manager`
+- Para parar o gerenciador de jobs: `stop_job_manager`
+- Para guardar um fato na memória semântica: `memoria_guardar`
+- Para buscar uma palavra-chave na memória semântica: `memoria_buscar`
+- Para listar os fatos guardados na memória semântica: `memoria_listar`
+- Para remover fatos da memória semântica que contenham um termo especifico: `memoria_esquecer`
+- Para mostrar estatísticas da memória semântica: `memoria_estatisticas`
+- Para mostrar o perfil do usuário: `perfil_mostrar`
+- Para atualizar o perfil automaticamente com análise de texto: `perfil_aprender`
+- Para adicionar uma observação manual ao perfil: `perfil_observar`
+- Para adicionar um conceito ao grafo de conhecimento: `grafo_adicionar`
+- Para visualizar o grafo de conhecimento a partir de um conceito central: `grafo_visualizar`
+- Para listar os conceitos mais relevantes do grafo de conhecimento: `grafo_listar`
+- Para gerar um sumário de conversa: `sumario_gerar`
+- Para mostrar sumários salvos anteriores: `sumario_mostrar`
+- Para refletir sobre o aprendizado da IA: `refletir`
+- Para registrar erros para não repeti-los no futuro: `aprender_com_erro`
+- Para listar os erros passados registrados: `erros_listar`
+- Para processar uma mensagem automaticamente: `processar_conversa`
+- Para traduzir textos entre 70+ idiomas: `traduzir_texto`
+- Para detectar o idioma de um texto: `detectar_idioma`
+- Para falar em voz alta: `falar_texto`
+- Para converter texto para áudio: `salvar_audio`
+- Para calcular o IMC: `calcular_imc`
+- Para converter valores entre unidades de medida: `converter_unidades`
+- Para converter moedas: `converter_moeda`
+- Para obter informações do clima em uma cidade: `clima_agora`
+
+Essas funções são bastante úteis para diversas tarefas relacionadas à inteligência artificial, automação e processamento de dados.

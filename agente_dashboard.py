@@ -38,6 +38,9 @@ DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "agente_data
 TURBO_CACHE_DIR = os.path.join(DATA_DIR, "turbo_cache")
 ANALYTICS_DIR = os.path.join(DATA_DIR, "analytics")
 MEMORY_EVOL_DIR = os.path.join(DATA_DIR, "memoria_evolutiva")
+AUTONOMY_TASKS_FILE = os.path.join(DATA_DIR, "fluxo_autonomo", "tarefas.json")
+APPROVALS_FILE = os.path.join(DATA_DIR, "governanca", "aprovacoes.json")
+EVALUATIONS_FILE = os.path.join(DATA_DIR, "avaliacoes", "execucoes.json")
 
 # Cores para o grafico de pizza
 PIE_COLORS = ["cyan", "green", "yellow", "magenta", "blue", "red", "bright_cyan", 
@@ -307,6 +310,18 @@ def _coletar_metricas():
     # Historico
     history = _load_json(os.path.join(DATA_DIR, "historico.json"), [])
     metrics["historico_msgs"] = len(history)
+
+    autonomy_tasks = _load_json(AUTONOMY_TASKS_FILE, [])
+    approvals = _load_json(APPROVALS_FILE, [])
+    metrics["autonomy_active"] = sum(1 for task in autonomy_tasks if task.get("estado") in {"planejado", "executando", "validando", "corrigindo", "aguardando_aprovacao"})
+    metrics["autonomy_approved"] = sum(1 for task in autonomy_tasks if task.get("estado") == "aprovado")
+    metrics["autonomy_evidence"] = sum(len(task.get("evidencias", [])) for task in autonomy_tasks)
+    metrics["recent_tasks"] = list(reversed(autonomy_tasks[-3:]))
+    metrics["approvals_pending"] = sum(1 for approval in approvals if approval.get("status") == "pendente")
+    evaluations = _load_json(EVALUATIONS_FILE, [])
+    metrics["evaluations_total"] = len(evaluations)
+    metrics["evaluations_passed"] = sum(1 for item in evaluations if item.get("passed"))
+    metrics["evaluation_regressions"] = sum(1 for item in evaluations if item.get("regression"))
     
     return metrics
 
@@ -417,6 +432,11 @@ def _render_dashboard():
     ana_table.add_row("⚙ Tool calls", str(m["tool_calls"]))
     ana_table.add_row("💬 Mensagens", str(m["mensagens"]))
     ana_table.add_row("📝 Conversas exportadas", str(m["conversas_count"]))
+    ana_table.add_row("🤖 Tarefas autônomas", f"{m['autonomy_active']} ativas / {m['autonomy_approved']} aprovadas")
+    ana_table.add_row("📎 Evidências", str(m["autonomy_evidence"]))
+    ana_table.add_row("🧪 Avaliações", f"{m['evaluations_passed']}/{m['evaluations_total']} aprovadas")
+    ana_table.add_row("⚠ Regressões", str(m["evaluation_regressions"]))
+    ana_table.add_row("🛡 Aprovações pendentes", str(m["approvals_pending"]))
     
     # Taxa de sucesso com cor
     sucesso = m["sucesso"]
@@ -544,6 +564,7 @@ def _render_dashboard():
     footer_parts.append(f"🧠 {m['fatos_count']} fatos")
     footer_parts.append(f"🔗 {m['grafo_nos']} nos no grafo")
     footer_parts.append(f"⚙ {m['tool_calls']} tools")
+    footer_parts.append(f"🤖 {m['autonomy_active']} tarefas ativas")
     
     if m["fatos_count"] > 0 or m["tool_calls"] > 0:
         footer_parts.append(f"✅ {m['sucesso']:.0f}% sucesso")
@@ -570,7 +591,7 @@ def run_dashboard():
         print("-" * 30)
         while True:
             m = _coletar_metricas()
-            os.system("cls" if os.name == "nt" else "clear")
+            subprocess.run("cls" if os.name == "nt" else "clear", shell=True, capture_output=True)
             print(f"🚀 AGENTE LOCAL DASHBOARD  |  {m['data']} {m['timestamp']}")
             print("=" * 50)
             print(f"\n🧠 MEMORIA:")

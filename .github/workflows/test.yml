@@ -1,0 +1,156 @@
+# =============================================================================
+# GitHub Actions — Test Suite
+# =============================================================================
+# Rodado em: push (main), pull requests
+# 
+# Executa todos os testes do projeto com pytest.
+# NOTA: Requer Ollama + nomic-embed-text para testes RAG completos.
+#       Os testes que dependem de chromadb real sao pulados se nao disponivel.
+# =============================================================================
+
+name: Test Suite
+
+on:
+  push:
+    branches: [main, develop]
+    paths-ignore:
+      - '**.md'
+      - 'docker-compose*.yml'
+      - '.dockerignore'
+      - '.github/workflows/docker-build.yml'
+  pull_request:
+    branches: [main]
+    paths-ignore:
+      - '**.md'
+      - 'docker-compose*.yml'
+      - '.dockerignore'
+
+env:
+  PYTHON_VERSION: "3.11"
+  OLLAMA_VERSION: "latest"
+
+jobs:
+
+  # ─── Job 1: Testes ──────────────────────────────────────────────────────
+  tests:
+    name: "Tests (Python ${{ env.PYTHON_VERSION }})"
+    runs-on: ubuntu-latest
+
+    services:
+      ollama:
+        image: ollama/ollama:${{ env.OLLAMA_VERSION }}
+        ports:
+          - 11434:11434
+        options: >-
+          --health-cmd "ollama list"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+          --health-start-period 30s
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential \
+            libgl1-mesa-glx \
+            libglib2.0-0 \
+            tesseract-ocr \
+            libgomp1
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-timeout pytest-asyncio
+
+      - name: Install Playwright (headless)
+        run: |
+          pip install playwright
+          python -m playwright install chromium
+          python -m playwright install-deps chromium
+
+      - name: Pull embedding model (for RAG)
+        run: |
+          # Aguarda Ollama iniciar
+          sleep 10
+          ollama pull nomic-embed-text
+        env:
+          OLLAMA_HOST: http://localhost:11434
+
+      - name: Pull default LLM model
+        run: |
+          ollama pull llama3.2:3b
+        env:
+          OLLAMA_HOST: http://localhost:11434
+
+      - name: Create .env with CI model
+        run: |
+          printf 'AGENTE_MODEL=llama3.2:3b\n' > .env
+
+      - name: Run tests
+        run: |
+          python -m pytest -v --tb=short --timeout=120 -q tests/
+        env:
+          OLLAMA_HOST: http://localhost:11434
+          AGENTE_MODEL: llama3.2:3b
+          PYTHONIOENCODING: utf-8
+          PYTHONUNBUFFERED: 1
+
+      - name: Run security tests specifically
+        run: |
+          python -m pytest tests/test_security.py -v --tb=short --timeout=60
+        continue-on-error: true
+
+      - name: Run integration tests specifically
+        run: |
+          python -m pytest tests/test_integration.py -v --tb=short --timeout=60
+        continue-on-error: true
+
+      - name: Upload test results (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: |
+            *.log
+            agente_data/
+          retention-days: 3
+
+  # ─── Job 2: Lint (flake8 + bandit) ──────────────────────────────────────
+  lint:
+    name: "Lint"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install linters
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8 bandit
+
+      - name: Run flake8 (syntax + style)
+        run: |
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          flake8 . --count --exit-zero --max-complexity=15 --statistics
+
+      - name: Run bandit (security)
+        run: |
+          bandit -r . -x venv,__pycache__,tests,agente_core_backup.py -ll
+        continue-on-error: true

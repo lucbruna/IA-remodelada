@@ -1,0 +1,57 @@
+# =============================================================================
+# .dockerignore — Arquivos ignorados pelo build Docker
+# =============================================================================
+
+# Git
+.git
+.gitignore
+.gitattributes
+.gitmodules
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+*.egg
+dist/
+build/
+.eggs/
+*.whl
+
+# Ambiente virtual
+venv/
+.venv/
+env/
+.env/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Dados locais (mantidos via volume)
+agente_data/
+!agente_data/.gitkeep
+
+# Logs e screenshots
+*.log
+server_log*.txt
+
+# Testes e calculadora (nao necessarios em producao)
+calculadora/
+
+# Documentacao
+README.md
+instrucoes.txt
+_commit_msg.txt
+
+# Docker
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# Projetos auxiliares
+projeto_turbo/

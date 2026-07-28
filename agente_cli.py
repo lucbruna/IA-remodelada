@@ -19,6 +19,7 @@ COMANDOS ESPECIAIS:
   /ajuda              -> mostra esta mensagem de ajuda
 """
 
+import os
 import sys
 import shutil
 
@@ -47,6 +48,62 @@ from agente_core import (
     structured_reasoning,
     code_review,
 )
+from config import reload_config
+
+
+# ─── Modelos disponíveis ────────────────────────────────────────────
+def get_available_ollama_models() -> list:
+    """Lista todos os modelos disponíveis no Ollama local."""
+    try:
+        import ollama
+        response = ollama.list()
+        raw_models = response.get("models", []) if hasattr(response, "get") else getattr(response, "models", [])
+        models = []
+        for m in raw_models:
+            if hasattr(m, "model_dump"):
+                d = m.model_dump()
+            elif isinstance(m, dict):
+                d = m
+            else:
+                d = {}
+            name = d.get("name") or d.get("model") or "?"
+            size_bytes = d.get("size", 0) or 0
+            size_gb = size_bytes / (1024**3)
+            models.append({
+                "name": name,
+                "display": f"{name} ({size_gb:.1f} GB)" if size_gb > 0 else name,
+                "size_gb": size_gb,
+            })
+        models.sort(key=lambda x: x["size_gb"])
+        return models
+    except Exception:
+        return []
+
+
+def update_env_model(model_name: str) -> bool:
+    """Atualiza o modelo no arquivo .env."""
+    env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
+    lines = []
+    found = False
+
+    if os.path.exists(env_path):
+        with open(env_path, "r", encoding="utf-8") as f:
+            for line in f:
+                if line.strip().startswith("AGENTE_MODEL="):
+                    lines.append(f"AGENTE_MODEL={model_name}\n")
+                    found = True
+                else:
+                    lines.append(line)
+
+    if not found:
+        lines.insert(0, f"AGENTE_MODEL={model_name}\n")
+
+    with open(env_path, "w", encoding="utf-8") as f:
+        f.writelines(lines)
+
+    # Atualiza variável de ambiente em runtime
+    os.environ["AGENTE_MODEL"] = model_name
+    return True
 
 
 # =======================================================================
@@ -409,6 +466,29 @@ def chat_loop():
             print()
             continue
 
+        if user_input.lower().startswith("/model"):
+            partes = user_input.split(maxsplit=1)
+            if len(partes) > 1:
+                new_model = partes[1].strip()
+                if update_env_model(new_model):
+                    print_colored(f"\n✅ Modelo alterado para: {new_model}", Cores.VERDE)
+                    print_colored("   Reinicie o programa para aplicar完全.", Cores.CINZA)
+                else:
+                    print_colored("\n❌ Erro ao alterar modelo", Cores.VERMELHO)
+            else:
+                # Lista modelos disponíveis
+                models = get_available_ollama_models()
+                if models:
+                    print_colored("\n🤖 Modelos disponíveis:", Cores.CIANO)
+                    for i, m in enumerate(models, 1):
+                        current = " (atual)" if m["name"] == MODEL else ""
+                        print(f"  {Cores.BOLD}{i}.{current}{Cores.RESET} {m['display']}")
+                    print(f"\n  Uso: {Cores.BOLD}/model <nome>{Cores.RESET} ou {Cores.BOLD}/model <numero>{Cores.RESET}")
+                else:
+                    print_colored("\n⚠ Nenhum modelo encontrado no Ollama", Cores.AMARELO)
+            print()
+            continue
+
         if user_input.lower() in ("/ajuda", "/help"):
             print_colored("\n📖 AJUDA - Comandos disponíveis:", Cores.CIANO)
             print(f"  {Cores.BOLD}Qualquer texto{Cores.RESET}    -> Envia mensagem para o agente")
@@ -437,6 +517,8 @@ def chat_loop():
             print(f"  {Cores.BOLD}/turbo-decompor <tarefa>{Cores.RESET} -> Decompor tarefa complexa")
             print(f"  {Cores.BOLD}/turbo-raciocinar <tarefa>{Cores.RESET} -> Raciocínio estruturado")
             print(f"  {Cores.BOLD}/turbo-revisar <codigo>{Cores.RESET} -> Revisar código fonte")
+            print(f"  {Cores.BOLD}/model{Cores.RESET}              -> Lista modelos disponíveis ou altera modelo")
+            print(f"  {Cores.BOLD}/model <nome>{Cores.RESET}       -> Altera modelo (ex: /model gemma4:E4B)")
             print()
             continue
 
@@ -453,21 +535,65 @@ def chat_loop():
         def show_step(text):
             print(f"{Cores.BEGE}  ⚙ {text}{Cores.RESET}")
 
+        # Streaming: imprime tokens da resposta final assim que chegam.
+        streaming_active = False
+
+        def on_token(token):
+            nonlocal streaming_active
+            if not streaming_active:
+                print()
+                print_separador()
+                print(f"{Cores.AZUL}Agente{Cores.RESET} » ", end="", flush=True)
+                streaming_active = True
+            # Substitui quebras de linha mantendo legibilidade no terminal.
+            safe = token.replace("\r\n", "\n").replace("\r", "\n")
+            print(f"{Cores.RESET}{safe}", end="", flush=True)
+
         try:
             print()
-            messages = run_agent_turn(messages, model=MODEL, on_step=show_step)
-            print()
+            # Executa em thread separada para permitir cancelamento (Ctrl+C)
+            # sem travar o processo e isolar falhas de I/O do modelo.
+            import threading
+            _result = {"messages": None, "error": None}
+
+            def _worker():
+                try:
+                    _result["messages"] = run_agent_turn(
+                        messages, model=MODEL, on_step=show_step, on_token=on_token
+                    )
+                except Exception as e:  # pragma: no cover - isolamento de thread
+                    _result["error"] = e
+
+            _thread = threading.Thread(target=_worker, daemon=True)
+            _thread.start()
+            _thread.join()
+            if _result["error"]:
+                raise _result["error"]
+
+            messages = _result["messages"]
+            if streaming_active:
+                print()  # nova linha após o streaming
+                print_separador()
+                print()
+            else:
+                print()
+        except KeyboardInterrupt:
+            print(f"\n{Cores.AMARELO}[Interrompido pelo usuario] A resposta foi parcial.{Cores.RESET}\n")
+            continue
         except Exception as e:
             print(f"\n{Cores.VERMELHO}[Erro inesperado] {e}{Cores.RESET}\n")
             continue
 
-        for m in reversed(messages):
-            if m.get("role") == "assistant" and m.get("content"):
-                print_separador()
-                print(f"{Cores.AZUL}Agente{Cores.RESET} » {m['content']}")
-                print_separador()
-                print()
-                break
+        # Garante exibição caso o streaming não tenha sido acionado
+        # (ex.: resposta vazia ou erro de comunicação tratado internamente).
+        if not streaming_active:
+            for m in reversed(messages):
+                if m.get("role") == "assistant" and m.get("content"):
+                    print_separador()
+                    print(f"{Cores.AZUL}Agente{Cores.RESET} » {m['content']}")
+                    print_separador()
+                    print()
+                    break
 
 
 if __name__ == "__main__":

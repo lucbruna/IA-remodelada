@@ -25,3 +25,12 @@ downloads/
 # Ambiente
 .vscode/
 .idea/
+
+# Backup de refatoração (agente_core original) — não versionar
+agente_core_backup.py
+
+# Arquivos de ambiente e logs de servidor
+.env
+server_*.txt
+_commit_msg.txt
+
