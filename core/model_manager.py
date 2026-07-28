@@ -198,8 +198,6 @@ def get_model_info(model_name: str) -> Optional[Dict[str, Any]]:
 
 
 def download_model(model_name: str, timeout: int = 600) -> Dict[str, Any]:
-    global _download_progress
-
     ollama_ok, msg = _check_ollama_health()
     if not ollama_ok:
         return {"success": False, "error": msg}

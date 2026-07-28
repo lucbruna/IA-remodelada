@@ -58,7 +58,7 @@ def _find_embedding_model() -> Optional[str]:
 
 def _init_chromadb() -> bool:
     """Inicializa ChromaDB como backend RAG."""
-    global RAG_AVAILABLE, RAG_COLLECTION, RAG_CLIENT, RAG_DOCUMENT_COUNT, RAG_BACKEND
+    global RAG_AVAILABLE, RAG_COLLECTION, RAG_CLIENT, RAG_DOCUMENT_COUNT, RAG_BACKEND  # noqa: F824
 
     try:
         import chromadb
@@ -105,7 +105,7 @@ def _init_qdrant() -> bool:
     Nota: Requer sentence-transformers para embeddings, ou ChromaDB
     para usar o OllamaEmbeddingFunction.
     """
-    global RAG_AVAILABLE, RAG_COLLECTION, RAG_CLIENT, RAG_DOCUMENT_COUNT, RAG_BACKEND
+    global RAG_AVAILABLE, RAG_CLIENT, RAG_DOCUMENT_COUNT, RAG_BACKEND  # noqa: F824
 
     try:
         from qdrant_client import QdrantClient
@@ -173,8 +173,6 @@ def init_rag(prefer: str = "chromadb") -> bool:
     Returns:
         True se RAG foi inicializado com sucesso
     """
-    global RAG_AVAILABLE
-
     if RAG_AVAILABLE:
         return True
 
@@ -523,7 +521,6 @@ def _ensure_rag(prefer: str = "chromadb") -> bool:
     Returns:
         True se RAG está disponível
     """
-    global RAG_AVAILABLE
     if RAG_AVAILABLE:
         return True
     return init_rag(prefer)

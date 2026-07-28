@@ -139,7 +139,6 @@ def load_optimized_parameters() -> None:
     reiniciar o processo). Respeita os limites de segurança definidos no
     plugin de auto-evolução.
     """
-    global NUM_CTX, TEMPERATURE, MAX_TOOL_ROUNDS, MAX_HISTORY_MESSAGES, OLLAMA_TIMEOUT_SECONDS
     if not os.path.exists(PARAM_FILE):
         return
     with _lock:

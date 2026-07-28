@@ -672,8 +672,6 @@ def get_backend(provider: str = None) -> LLMBackend:
       3. Se ANTHROPIC_API_KEY configurada, usa Anthropic
       4. Senao, usa Ollama (local)
     """
-    global _backends
-
     if provider:
         key = provider.lower()
     else:
