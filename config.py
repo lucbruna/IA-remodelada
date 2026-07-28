@@ -14,6 +14,7 @@ Carregue sempre daqui:
 
 import os
 import json
+import logging
 import threading
 
 
@@ -183,6 +184,10 @@ def load_optimized_parameters() -> None:
             if val is None:
                 continue
             lo, hi = ranges[key]
+            if val > hi:
+                logging.warning("Parametro %s=%s excede maximo %s; usando %s", key, val, hi, hi)
+            elif val < lo:
+                logging.warning("Parametro %s=%s abaixo do minimo %s; usando %s", key, val, lo, lo)
             val = max(lo, min(hi, val))
             globals()[var] = val
 

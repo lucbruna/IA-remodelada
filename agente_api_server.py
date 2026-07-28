@@ -81,9 +81,9 @@ def _reset_stop_event(conv_id: str):
 
 class ChatParams(BaseModel):
     temperature: float = Field(default=TEMPERATURE, ge=0.0, le=2.0)
-    top_p: float = Field(default=0.9, ge=0.0, le=1.0)
+    top_p: float = Field(default=TOP_P, ge=0.0, le=1.0)
     max_tokens: int = Field(default=4096, ge=64, le=32768)
-    num_ctx: int = Field(default=NUM_CTX, ge=2048, le=131072)
+    num_ctx: int = Field(default=NUM_CTX, ge=2048, le=16384)
 
 class ChatRequest(BaseModel):
     message: str
