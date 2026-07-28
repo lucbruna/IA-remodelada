@@ -18,13 +18,10 @@ Funcionalidades:
   - Adversarial Verification: loop de verificacao adversarial
 """
 
-import os
 import json
-import logging
-from datetime import datetime
-from typing import Optional, List, Dict, Any
+from typing import Dict, Any
 
-from ._common import logging, json, datetime
+from ._common import json
 
 
 # --- Chain-of-Thought Prompts ---

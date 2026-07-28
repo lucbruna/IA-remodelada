@@ -12,17 +12,14 @@ Funcionalidades:
   - Error tracking
 """
 
-import os
 import time
 import json
 import logging
-from typing import Optional, Callable
-from datetime import datetime
 
-from fastapi import Request, Response
+from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from ._common import logging, json, datetime, time
+from ._common import logging, json, time
 
 logger = logging.getLogger("middleware")
 

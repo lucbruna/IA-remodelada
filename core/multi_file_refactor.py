@@ -1,9 +1,8 @@
 import os
 import re
 import json
-import logging
 import subprocess
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List
 from datetime import datetime
 
 

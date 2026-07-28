@@ -12,11 +12,7 @@ Plugin de processamento avançado de imagens. Fornece ferramentas para geração
 """
 
 import os
-import io
-import base64
-from datetime import datetime
-from typing import Tuple, List, Optional, Union
-import hashlib
+from typing import Tuple, Union
 
 __version__ = "1.0.0"
 PLUGIN_NAME = "Processamento Avançado de Imagens"
@@ -58,7 +54,6 @@ def get_image_info(image_path: str) -> str:
 
     try:
         from PIL import Image, ExifTags
-        import json
 
         with Image.open(image_path) as img:
             info = []

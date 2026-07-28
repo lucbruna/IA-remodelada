@@ -1,5 +1,4 @@
 from ._common import *
-import ollama
 # =======================================================================
 # MEMORIA PERSISTENTE (fatos que o agente lembra entre sessoes)
 # =======================================================================

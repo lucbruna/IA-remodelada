@@ -1,10 +1,6 @@
 import os
 import sys
-import json
-import tempfile
-import shutil
-import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -145,7 +141,7 @@ class TestSessionEnd:
 
 class TestUtilityFunctions:
     def test_hook_stats(self):
-        from core.hooks_production import get_hook_stats, pre_tool_guard
+        from core.hooks_production import get_hook_stats
         result = get_hook_stats()
         assert "total_events" in result
 

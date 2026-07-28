@@ -18,7 +18,6 @@ PLUGIN_NAME = "Issue-to-PR Automation"
 
 import os
 import re
-import json
 import logging
 import subprocess
 

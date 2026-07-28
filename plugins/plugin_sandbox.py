@@ -21,14 +21,11 @@ Uso:
 """
 
 import json
-import os
 import re
 import sys
 import time
 import uuid
 import shutil
-import logging
-import hashlib
 import subprocess
 import unicodedata
 from pathlib import Path

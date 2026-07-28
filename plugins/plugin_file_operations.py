@@ -13,10 +13,7 @@ import os
 import shutil
 import hashlib
 import mimetypes
-import json
-import csv
-from datetime import datetime, timedelta
-from pathlib import Path
+from datetime import datetime
 import fnmatch
 
 __version__ = "1.0.0"

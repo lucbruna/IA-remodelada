@@ -1,19 +1,4 @@
 from ._common import *
-import ollama
-import pytesseract
-from PIL import Image
-from PIL import Image
-from PIL import Image
-from PIL import Image
-from PIL import Image
-from PIL import Image
-from PIL import Image
-from PIL import Image
-from PIL import Image
-from PIL import Image
-from PIL import Image
-from PIL import Image
-from PIL import Image
 # =======================================================================
 # DOCUMENTOS: PDF e IMAGEM
 # =======================================================================

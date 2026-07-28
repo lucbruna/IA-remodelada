@@ -12,12 +12,11 @@ Funcionalidades:
   - Desconexao limpa
 """
 
-import os
 import json
 import time
 import asyncio
 import logging
-from typing import Dict, Set, Optional, Any
+from typing import Dict, Set
 from datetime import datetime
 
 from ._common import logging, json, datetime

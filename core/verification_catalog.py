@@ -26,15 +26,12 @@ Uso:
 
 import os
 import ast
-import json
 import hashlib
-import logging
 import subprocess
 from datetime import datetime
 from typing import Optional, Dict, Any, List, Callable
-from pathlib import Path
 
-from ._common import os, json, logging, _load_json, _save_json, DATA_DIR
+from ._common import os, _load_json, _save_json, DATA_DIR
 
 VERIFICATION_DIR = os.path.join(DATA_DIR, "verifications")
 os.makedirs(VERIFICATION_DIR, exist_ok=True)

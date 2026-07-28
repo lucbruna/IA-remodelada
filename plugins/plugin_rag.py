@@ -13,7 +13,6 @@ __version__ = "1.0.0"
 
 import os
 import json
-import logging
 from typing import Optional
 
 # ─── Diretórios ────────────────────────────────────────────────────

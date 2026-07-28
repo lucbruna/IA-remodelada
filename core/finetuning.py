@@ -18,13 +18,9 @@ Funcionalidades:
 
 import os
 import json
-import hashlib
-import logging
 from datetime import datetime
-from typing import Optional, List, Dict, Any
-from pathlib import Path
 
-from ._common import DATA_DIR, _load_json, _save_json, logging
+from ._common import DATA_DIR, _save_json
 
 # --- Config ---
 FINETUNE_DIR = os.path.join(DATA_DIR, "finetuning")

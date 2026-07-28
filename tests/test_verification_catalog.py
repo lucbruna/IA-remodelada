@@ -1,10 +1,9 @@
 import os
 import sys
-import json
 import tempfile
 import shutil
 import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 

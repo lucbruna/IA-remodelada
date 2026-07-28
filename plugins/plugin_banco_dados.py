@@ -8,9 +8,7 @@ importacao/exportacao, migracao e consultas.
 import os
 import json
 import csv
-import io
 import sqlite3
-import logging
 from datetime import datetime
 
 __version__ = "1.0.0"

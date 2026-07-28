@@ -39,7 +39,7 @@ def register(api):
         """
         try:
             import ollama
-            from agente_core import _call_ollama_with_timeout, NUM_CTX, TEMPERATURE
+            from agente_core import _call_ollama_with_timeout, NUM_CTX
 
             prompt = (
                 "Voce e um engenheiro de software senior. Sua unica funcao e "
@@ -68,7 +68,7 @@ def register(api):
         """
         try:
             import ollama
-            from agente_core import _call_ollama_with_timeout, NUM_CTX, TEMPERATURE
+            from agente_core import _call_ollama_with_timeout, NUM_CTX
 
             prompt = (
                 "Voce e um analista senior especializado em sintetizar informacoes, "
@@ -97,7 +97,7 @@ def register(api):
         """
         try:
             import ollama
-            from agente_core import _call_ollama_with_timeout, NUM_CTX, TEMPERATURE
+            from agente_core import _call_ollama_with_timeout, NUM_CTX
 
             prompt = (
                 "Voce e um escritor e designer criativo profissional. "

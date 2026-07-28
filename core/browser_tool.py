@@ -26,17 +26,13 @@ Funcionalidades:
 """
 
 import os
-import re
-import json
-import hashlib
 import logging
 from datetime import datetime
-from typing import Optional, List, Dict, Any, Tuple
-from urllib.parse import urljoin, urlparse
+from typing import Optional, List, Dict, Any
 
 from ._common import (
-    os, re, json, hashlib, logging, datetime,
-    _load_json, _save_json, DATA_DIR, urllib,
+    os, logging, datetime,
+    DATA_DIR,
 )
 
 try:

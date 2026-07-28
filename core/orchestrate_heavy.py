@@ -1,5 +1,4 @@
 from ._common import *
-import json
 
 # =======================================================================
 # ORCHESTRATE HEAVY - tarefas complexas em etapas (estilo OMP)

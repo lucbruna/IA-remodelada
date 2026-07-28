@@ -6,12 +6,10 @@ amostragem, deteccao de outliers, geracao de dados sinteticos,
 matriz de confusao basica.
 """
 
-import os
 import json
 import math
 import statistics
 import random
-from datetime import datetime
 
 __version__ = "1.0.0"
 PLUGIN_NAME = "Ciencia de Dados"

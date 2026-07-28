@@ -1,5 +1,4 @@
 from ._common import *
-import ollama
 def ensure_ollama() -> bool:
     """
     Verifica se o Ollama esta rodando e tenta iniciar automaticamente se nao estiver.

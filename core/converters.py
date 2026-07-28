@@ -1,22 +1,4 @@
 from ._common import *
-import requests
-import socket
-from PIL import Image
-import qrcode
-import markdown
-import autopep8
-from PIL import Image
-from PIL import Image
-from PIL import Image
-from PIL import Image
-from PIL import Image
-from PIL import Image
-from PIL import Image
-from PIL import Image
-from PIL import Image
-from PIL import Image
-from PIL import Image
-from PIL import Image
 def format_code(code: str, language: str = "python") -> str:
     """Formata/embeleza codigo fonte. Suporta: python, javascript, html, css, json."""
     try:

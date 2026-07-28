@@ -24,8 +24,6 @@ PLUGIN_NAME = "Mem0 (Memoria Avancada)"
 import os
 import json
 import logging
-import uuid
-from datetime import datetime
 
 logger = logging.getLogger(__name__)
 

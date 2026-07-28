@@ -16,7 +16,6 @@ __version__ = "1.0.0"
 PLUGIN_NAME = "Diff Preview System"
 
 import os
-import re
 import json
 import difflib
 import logging

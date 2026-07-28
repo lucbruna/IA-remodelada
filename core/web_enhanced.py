@@ -23,7 +23,7 @@ import hashlib
 import logging
 from datetime import datetime
 from typing import Optional, List, Dict, Any
-from urllib.parse import urlparse, urljoin
+from urllib.parse import urljoin
 
 from ._common import (
     os, re, json, hashlib, logging, datetime,

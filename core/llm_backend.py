@@ -25,12 +25,11 @@ import time
 import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import Optional, List, Dict, Any, Generator
+from typing import Optional, List, Any, Generator
 from enum import Enum
 
 from ._common import (
-    MODEL, NUM_CTX, TEMPERATURE, OLLAMA_TIMEOUT_SECONDS,
-    OLLAMA_MAX_RETRIES, OLLAMA_KEEP_ALIVE,
+    MODEL, NUM_CTX, TEMPERATURE, OLLAMA_KEEP_ALIVE,
 )
 
 

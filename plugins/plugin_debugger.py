@@ -17,11 +17,8 @@ PLUGIN_NAME = "Visual Debugger"
 
 import os
 import ast
-import sys
 import json
 import logging
-import threading
-import traceback
 from datetime import datetime
 
 logger = logging.getLogger(__name__)

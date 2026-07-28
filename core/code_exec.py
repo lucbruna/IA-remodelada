@@ -1,5 +1,4 @@
 from ._common import *
-import ollama
 # =======================================================================
 # SISTEMA, CODIGO, WEB
 # =======================================================================
@@ -38,7 +37,6 @@ def run_command(command: str, timeout: int = 30) -> str:
 
 
 def run_python_code(code: str, auto_fix: bool = True) -> str:
-    from agente_core import _call_ollama_with_timeout, _chat_with_retries  # lazy p/ suportar patches de teste
     """Executa um trecho de codigo Python e retorna o que foi impresso (print).
 
     ATENCAO: Esta funcao executa codigo arbitrario. Use apenas com
@@ -113,7 +111,7 @@ def run_python_code(code: str, auto_fix: bool = True) -> str:
 
 
 def gerar_codigo(descricao: str, linguagem: str = "python", salvar_em: str = "") -> str:
-    from agente_core import _call_ollama_with_timeout, _chat_with_retries  # lazy p/ suportar patches de teste
+    from agente_core import _call_ollama_with_timeout  # lazy p/ suportar patches de teste
     """Gera codigo fonte a partir de descricao em linguagem natural usando IA.
 
     Args:

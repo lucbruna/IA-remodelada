@@ -8,12 +8,8 @@ Plugin de ensemble de modelos de linguagem. Fornece ferramentas para:
 - Otimização de seleção de modelo baseado no tipo de tarefa
 """
 
-import os
-import json
-import statistics
 from collections import Counter
-from typing import Dict, List, Any, Optional, Tuple
-from datetime import datetime
+from typing import List
 
 # Importar o cliente Ollama para comunicação direta com modelos
 try:

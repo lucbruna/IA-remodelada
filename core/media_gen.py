@@ -1,7 +1,4 @@
 from ._common import *
-import requests
-import smtplib
-import whisper
 def generate_image(
     prompt: str,
     negative_prompt: str = "",

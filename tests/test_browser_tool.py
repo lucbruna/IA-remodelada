@@ -1,10 +1,7 @@
 import os
 import sys
-import json
-import tempfile
-import shutil
 import pytest
-from unittest.mock import patch, MagicMock, PropertyMock
+from unittest.mock import patch, MagicMock
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -28,7 +25,7 @@ def mock_playwright():
 
 class TestBrowserTool:
     def test_import(self):
-        from core.browser_tool import BrowserTool, get_browser
+        from core.browser_tool import get_browser
         assert callable(get_browser)
 
     def test_navigate(self, mock_playwright):

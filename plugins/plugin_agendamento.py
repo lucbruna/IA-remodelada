@@ -6,9 +6,7 @@ baseados em SQLite com verificacao sob demanda (sem thread background).
 """
 
 import os
-import json
 import sqlite3
-import logging
 from datetime import datetime, timedelta
 
 __version__ = "1.0.0"

@@ -5,9 +5,7 @@ Abre uma janela para diagnosticar por que os botões não aparecem no agente_gui
 Execute: python diagnostico_gui.py
 """
 import tkinter as tk
-from tkinter import ttk
 import sys
-import os
 
 root = tk.Tk()
 root.title("Diagnóstico GUI - Botões")

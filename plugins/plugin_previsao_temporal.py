@@ -11,8 +11,7 @@ Plugin de previsão temporal e análise de dados. Fornece ferramentas para:
 import math
 import random
 import statistics
-from typing import List, Tuple, Optional, Any
-from datetime import datetime, timedelta
+from typing import List, Tuple
 
 __version__ = "1.0.0"
 PLUGIN_NAME = "Previsão Temporal e Análise de Dados"

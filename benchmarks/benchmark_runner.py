@@ -2,9 +2,8 @@ import os
 import sys
 import json
 import time
-import logging
 from datetime import datetime
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 

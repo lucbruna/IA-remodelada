@@ -1,5 +1,4 @@
 from ._common import *
-from .media import describe_image
 # =======================================================================
 # FUNCOES TURBO INTEGRADAS (disponiveis mesmo sem import do modulo)
 # =======================================================================

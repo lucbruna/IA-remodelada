@@ -17,7 +17,6 @@ import json
 import sqlite3
 import threading
 from datetime import datetime
-from typing import Optional
 
 from ._common import DATA_DIR
 

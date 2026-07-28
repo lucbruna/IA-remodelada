@@ -9,7 +9,6 @@ Requer: pip install crewai crewai-tools
 __version__ = "1.0.0"
 PLUGIN_NAME = "CrewAI Integration"
 
-import os
 import json
 import logging
 

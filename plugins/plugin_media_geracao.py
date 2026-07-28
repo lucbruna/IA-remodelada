@@ -16,10 +16,7 @@ import os
 import json
 import uuid
 import time
-import base64
-import io
 import logging
-from datetime import datetime
 from typing import Optional
 
 logger = logging.getLogger("plugin_media_geracao")

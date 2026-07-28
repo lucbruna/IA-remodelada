@@ -6,10 +6,8 @@ Testes de seguranca: prompt guard, API auth, rate limiting, subprocess safety.
 
 import os
 import sys
-import time
-import json
 import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -26,8 +24,6 @@ class TestPromptGuard:
             prompt_guard_scan_input,
             prompt_guard_scan_tool_output,
             prompt_guard_should_block,
-            _max,
-            _LEVEL_RANK,
         )
         assert callable(prompt_guard_scan_input)
         assert callable(prompt_guard_scan_tool_output)
@@ -109,9 +105,7 @@ class TestAPISecurity:
     def test_import(self):
         from core.api_security import (
             verify_api_key,
-            RateLimiter,
             security_middleware,
-            get_rate_limiter,
         )
         assert callable(verify_api_key)
         assert callable(security_middleware)
@@ -210,7 +204,6 @@ class TestConfigSecurity:
 
     def test_security_constants_exist(self):
         from config import (
-            API_KEY,
             RATE_LIMIT,
             RATE_LIMIT_WINDOW,
             AUTO_EVOLVE_INTERVAL,

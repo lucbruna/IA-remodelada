@@ -9,7 +9,7 @@ __version__ = "1.0.0"
 
 
 def register(api):
-    from orquestrador_mestre import orquestrar, OrquestradorMestre
+    from orquestrador_mestre import orquestrar
 
     def ferramenta_orquestrar(tarefa: str, contexto: str = "") -> str:
         """Executa o Orquestrador Mestre completo: CEO analisa, delega para agentes especialistas, e Self-Reflection revisa o resultado final. Use para tarefas complexas que exigem múltiplas etapas."""

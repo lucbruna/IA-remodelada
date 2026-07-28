@@ -14,12 +14,6 @@ Funcoes disponiveis:
 
 from plugins.plugin_sandbox import (
     sandbox_status,
-    sandbox_executar_comando as executar_no_sandbox,
-    sandbox_criar_projeto,
-    sandbox_listar_projetos,
-    sandbox_executar,
-    sandbox_instalar_pacotes,
-    sandbox_historico,
 )
 
 __version__ = "2.0.0"

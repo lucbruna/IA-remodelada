@@ -1,5 +1,4 @@
 from ._common import *
-import sqlite3
 def file_diff(file1: str, file2: str) -> str:
     """Compara dois arquivos de texto e mostra as diferencas (unified diff)."""
     try:

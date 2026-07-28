@@ -6,11 +6,9 @@ e varredura simples de seguranca em arquivos.
 """
 
 import os
-import json
 import hashlib
 import string
 import random
-import logging
 import base64
 
 __version__ = "1.0.0"

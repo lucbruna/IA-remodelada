@@ -18,7 +18,6 @@ Uso no agente:
   "Checksum SHA256 deste arquivo"
 """
 
-import logging
 import secrets
 import string
 import hashlib

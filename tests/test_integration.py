@@ -6,12 +6,10 @@ Testes de integracao: fluxo completo do agente com mocks.
 
 import os
 import sys
-import json
 import tempfile
 import shutil
 import pytest
-from unittest.mock import patch, MagicMock, AsyncMock
-from pathlib import Path
+from unittest.mock import patch
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -33,8 +31,7 @@ class TestHistoryDB:
 
     def test_import(self):
         from core.history_db import (
-            save_messages, load_messages, append_message,
-            search_messages, get_stats, delete_session,
+            save_messages, load_messages,
         )
         assert callable(save_messages)
         assert callable(load_messages)
@@ -170,8 +167,7 @@ class TestMemoryIntegration:
 
     def test_autonomy_import(self):
         from core.autonomy import (
-            _latest_user_text, _autonomous_context_for_turn,
-            _score_intents, _detect_complexity,
+            _latest_user_text, _score_intents,
         )
         assert callable(_latest_user_text)
         assert callable(_score_intents)

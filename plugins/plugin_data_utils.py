@@ -27,7 +27,6 @@ Uso no agente:
 """
 
 import json
-import logging
 import random
 import re
 from datetime import datetime

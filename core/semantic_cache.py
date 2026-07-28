@@ -15,15 +15,13 @@ Funcionalidades:
 
 import os
 import json
-import time
 import hashlib
 import logging
-from datetime import datetime, timedelta
-from typing import Optional, List, Dict, Any
+from datetime import datetime
+from typing import Optional, Dict, Any
 
 from ._common import (
-    os, json, logging, datetime, timedelta, time,
-    DATA_DIR, EMBEDDING_MODEL,
+    os, json, logging, datetime, DATA_DIR, EMBEDDING_MODEL,
 )
 
 # --- Config ---

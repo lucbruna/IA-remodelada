@@ -17,9 +17,7 @@ import os
 import json
 import time
 import uuid
-import hashlib
-import logging
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Optional
 
 __version__ = "1.0.0"
@@ -237,7 +235,6 @@ def benchmark_executar(
             if categoria == "codigo":
                 # Gera código a partir da descrição usando IA
                 from agente_core import gerar_codigo
-                from agente_core import write_file
                 codigo_raw = gerar_codigo(desc, "python")
                 # Extrai apenas o código puro do retorno formatado
                 codigo_puro = _extrair_codigo(codigo_raw)

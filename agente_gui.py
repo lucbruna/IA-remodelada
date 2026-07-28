@@ -24,12 +24,11 @@ COMO RODAR:
 import os
 import threading
 import tkinter as tk
-from tkinter import scrolledtext, messagebox, ttk, filedialog, simpledialog
+from tkinter import scrolledtext, messagebox, ttk, filedialog
 import tkinter.font as tkfont
 import time
 from datetime import datetime
 import sys
-import re
 
 from agente_core import (
     SYSTEM_PROMPT,
@@ -39,9 +38,7 @@ from agente_core import (
     export_conversation_markdown,
     export_conversation_html,
     list_plugins,
-    reload_plugins,
 )
-from config import reload_config
 
 
 # ─── Modelos disponíveis ────────────────────────────────────────────

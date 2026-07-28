@@ -1,6 +1,6 @@
 from ._common import *
 from .registry import *
-from .plugins_api import _plugin_manager, PluginManager, PluginAPI
+from .plugins_api import _plugin_manager
 # =======================================================================
 # Integracao com Memoria Evolutiva (plugin)
 # =======================================================================

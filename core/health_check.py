@@ -13,17 +13,14 @@ Funcionalidades:
 """
 
 import os
-import sys
 import signal
 import asyncio
 import logging
-import threading
 from datetime import datetime
 from typing import Dict, Any
 
 from ._common import (
-    os, sys, logging, datetime, threading,
-    DATA_DIR, MODEL, EMBEDDING_MODEL,
+    os, logging, datetime, DATA_DIR, MODEL, EMBEDDING_MODEL,
 )
 
 logger = logging.getLogger(__name__)

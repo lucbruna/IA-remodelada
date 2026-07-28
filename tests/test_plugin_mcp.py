@@ -22,9 +22,7 @@ Uso:
 import pytest
 import sys
 import os
-import json
-import time
-from unittest.mock import MagicMock, patch, call, ANY
+from unittest.mock import MagicMock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 

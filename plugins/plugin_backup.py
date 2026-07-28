@@ -7,12 +7,10 @@ e limpeza de backups antigos.
 """
 
 import os
-import json
 import shutil
 import zipfile
 import tarfile
 import glob
-import logging
 from datetime import datetime, timedelta
 
 __version__ = "1.0.0"

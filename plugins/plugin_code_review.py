@@ -17,7 +17,6 @@ Ideal para revisao diaria, PRs pequenos, e uso interativo.
 __version__ = "1.0.0"
 PLUGIN_NAME = "AI Code Review"
 
-import os
 import ast
 import re
 import logging

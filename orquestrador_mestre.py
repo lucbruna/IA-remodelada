@@ -18,12 +18,9 @@ USO:
         print(step["status"], step.get("agente", ""))
 """
 
-import os
-import json
 import time
 import logging
-from datetime import datetime
-from typing import Generator, Optional
+from typing import Generator
 
 logger = logging.getLogger("orquestrador_mestre")
 

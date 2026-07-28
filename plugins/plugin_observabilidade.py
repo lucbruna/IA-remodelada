@@ -1,7 +1,6 @@
 """Rastros locais para modelos, agentes, MCPs e ferramentas multimodais."""
 from __future__ import annotations
 import json
-import time
 from datetime import datetime, timezone
 from pathlib import Path
 

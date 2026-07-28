@@ -6,12 +6,9 @@ analise de sentimentos (basica por palavras), contagem, formatacao,
 extração de dados estruturados.
 """
 
-import os
 import json
 import re
 import difflib
-import logging
-from datetime import datetime
 
 __version__ = "1.0.0"
 PLUGIN_NAME = "Texto Avancado"

@@ -17,9 +17,8 @@ import json
 import time
 import uuid
 import logging
-import threading
 from datetime import datetime
-from typing import Optional, Dict, Any
+from typing import Dict, Any
 from contextvars import ContextVar
 
 from ._common import DATA_DIR

@@ -1,6 +1,5 @@
 from ._common import *
 import ast
-import time
 import io
 import contextlib
 
@@ -88,7 +87,6 @@ def code_benchmark(code: str, repeat: int = 5) -> str:
     agente. Reporta media, minimo, maximo e pico de RSS (MB).
     """
     import subprocess
-    import shlex
     script = (
         "import time\n"
         "t0=time.perf_counter()\n"

@@ -20,17 +20,10 @@ import json
 import time
 import uuid
 import asyncio
-import threading
-import shutil
-import re
 import logging
 from datetime import datetime
 from typing import Optional, AsyncGenerator
 from contextlib import asynccontextmanager
-from pathlib import Path
-import urllib.request
-import ollama
-from agente_core import _clean_messages
 import sys
 if hasattr(sys.stdout, 'reconfigure') and sys.stdout.encoding and sys.stdout.encoding.upper() not in ('UTF-8', 'UTF8'):
     sys.stdout.reconfigure(encoding='utf-8', errors='replace')
@@ -39,19 +32,17 @@ if hasattr(sys.stdout, 'reconfigure') and sys.stdout.encoding and sys.stdout.enc
 # --- FastAPI --------------------------------------------------------
 from fastapi import FastAPI, HTTPException, Body, Query, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse, StreamingResponse, JSONResponse, Response
+from fastapi.responses import HTMLResponse, StreamingResponse, Response
 from pydantic import BaseModel, Field
 
 # --- Agente Core ----------------------------------------------------
 from agente_core import (
     SYSTEM_PROMPT, MODEL, run_agent_turn, run_agent_turn_async, run_agent_turn_stream_async,
-    load_conversation_history,
-    save_conversation_history, AVAILABLE_FUNCTIONS, TOOLS_LIST,
+    AVAILABLE_FUNCTIONS, TOOLS_LIST,
     list_memories, list_plugins, reload_plugins, get_system_info,
     export_conversation_markdown, export_conversation_html,
-    search_conversation, session_save, session_load, session_list,
-    DATA_DIR as CORE_DATA_DIR, trim_and_summarize_history,
-    ensure_ollama,
+    session_save, session_load, session_list,
+    DATA_DIR as CORE_DATA_DIR, ensure_ollama,
 )
 
 # --- Config ---------------------------------------------------------

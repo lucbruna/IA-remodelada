@@ -1,4 +1,3 @@
-from pathlib import Path
 
 from plugins.plugin_validacao_universal import _safe_target, validar_entrega
 

@@ -16,12 +16,11 @@ PLUGIN_NAME = "Background Agents"
 
 import os
 import json
-import time
 import uuid
 import logging
 import threading
 from datetime import datetime
-from queue import Queue, Empty
+from queue import Queue
 
 logger = logging.getLogger(__name__)
 

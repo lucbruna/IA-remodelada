@@ -15,8 +15,7 @@ import time
 import hashlib
 import logging
 import threading
-from datetime import datetime
-from typing import Any, Callable, Optional
+from typing import Callable, Optional
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 TURBO_CACHE_DIR = os.path.join(
@@ -445,7 +444,7 @@ def execute_with_recovery(func: Callable, func_name: str, args: dict) -> str:
 
         try:
             import ollama
-            from agente_core import _call_ollama_with_timeout, NUM_CTX, MODEL
+            from agente_core import _call_ollama_with_timeout, MODEL
 
             prompt = (
                 f"Uma ferramenta falhou com o seguinte erro:\n\n"

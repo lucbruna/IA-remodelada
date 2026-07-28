@@ -15,9 +15,7 @@ import os
 import sys
 import json
 import subprocess
-import tempfile
 from datetime import datetime
-from pathlib import Path
 
 EVALS_DIR = os.path.dirname(os.path.abspath(__file__))
 RESULTS_DIR = os.path.join(EVALS_DIR, "results")

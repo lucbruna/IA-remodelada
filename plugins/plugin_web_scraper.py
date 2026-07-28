@@ -17,8 +17,8 @@ Recursos:
 
 import re
 import json
-from urllib.parse import urljoin, urlparse
-from typing import Dict, List, Optional, Any, Union
+from urllib.parse import urljoin
+from typing import List
 import time
 
 __version__ = "1.0.0"

@@ -8,9 +8,7 @@ que alimentam a memoria evolutiva para melhorar respostas futuras.
 """
 
 import os
-import json
 from datetime import datetime
-from typing import Optional
 
 from ._common import DATA_DIR, _load_json, _save_json, logging
 

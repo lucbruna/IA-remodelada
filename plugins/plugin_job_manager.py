@@ -6,16 +6,12 @@ Fornece sistema de filas, processamento assíncrono, monitoramento de progresso
 e gerenciamento de recursos para tarefas que consomem muito tempo ou recursos.
 """
 
-import time
 import threading
 import queue
 import uuid
-import json
-import os
-from datetime import datetime, timedelta
+from datetime import datetime
 from enum import Enum
 from typing import Dict, List, Callable, Any, Optional
-import heapq
 
 __version__ = "1.0.0"
 PLUGIN_NAME = "Gerenciador de Trabalhos e Tarefas"

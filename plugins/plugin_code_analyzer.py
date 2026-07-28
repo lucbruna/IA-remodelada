@@ -11,12 +11,7 @@ Plugin de análise avançada de código. Fornece ferramentas para:
 """
 
 import ast
-import os
-import re
-import json
-import subprocess
-import tempfile
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any
 
 __version__ = "1.0.0"
 PLUGIN_NAME = "Analisador de Código Avançado"

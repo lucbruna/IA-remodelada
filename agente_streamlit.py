@@ -17,20 +17,17 @@ from datetime import datetime
 from collections import Counter
 
 import streamlit as st
-from streamlit.runtime.scriptrunner import get_script_run_ctx
 
 # ─── Core ───────────────────────────────────────────────────────────
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from agente_core import (
     SYSTEM_PROMPT, MODEL, VISION_MODEL, NUM_CTX, TEMPERATURE,
     run_agent_turn, load_conversation_history, save_conversation_history,
-    AVAILABLE_FUNCTIONS, TOOLS_LIST,
-    remember, recall, forget, list_memories,
-    get_system_info, list_plugins, reload_plugins,
+    AVAILABLE_FUNCTIONS, remember, list_memories,
+    get_system_info, reload_plugins,
     export_conversation_markdown, export_conversation_html,
     get_plugin_manager, ensure_ollama,
 )
-from config import reload_config
 
 # ─── Modelos disponíveis ────────────────────────────────────────────
 def get_available_ollama_models() -> list:

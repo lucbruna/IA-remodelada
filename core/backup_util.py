@@ -11,11 +11,7 @@ Cria backups incrementais do diretorio agente_data/ com:
 """
 
 import os
-import json
-import gzip
 import hashlib
-import shutil
-import time
 from datetime import datetime
 from pathlib import Path
 

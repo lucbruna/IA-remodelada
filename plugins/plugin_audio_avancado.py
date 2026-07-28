@@ -8,10 +8,7 @@ audio transcription helper.
 
 import os
 import json
-import math
-import struct
 import wave
-import logging
 from datetime import datetime
 
 __version__ = "1.0.0"

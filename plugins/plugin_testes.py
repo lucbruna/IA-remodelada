@@ -11,8 +11,6 @@ import sys
 import json
 import time
 import traceback
-import logging
-from datetime import datetime
 
 __version__ = "1.0.0"
 PLUGIN_NAME = "Testes e Depuracao"

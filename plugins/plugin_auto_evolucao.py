@@ -16,9 +16,8 @@ import json
 import os
 import time
 import hashlib
-from datetime import datetime, timedelta
-from typing import Dict, List, Any, Optional, Tuple
-import math
+from datetime import datetime
+from typing import Dict, List, Any
 
 __version__ = "1.0.0"
 PLUGIN_NAME = "Sistema de Auto-Evolução Controlada"

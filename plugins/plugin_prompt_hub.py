@@ -17,7 +17,6 @@ PLUGIN_NAME = "Prompt Hub"
 
 import os
 import json
-import hashlib
 import logging
 from datetime import datetime
 

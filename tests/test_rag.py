@@ -20,11 +20,10 @@ Uso:
 
 import sys
 import os
-import json
 import tempfile
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from unittest.mock import patch, MagicMock, PropertyMock
+from unittest.mock import patch, MagicMock
 import pytest
 
 # ─── Skip condicional para testes de integracao ─────────────────────

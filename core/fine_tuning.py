@@ -27,16 +27,13 @@ Uso:
 import os
 import json
 import ast
-import shutil
 import logging
 import subprocess
-import tempfile
 from datetime import datetime
-from typing import Optional, Dict, Any, List, Tuple
-from pathlib import Path
+from typing import Dict, Any, List
 
 from ._common import (
-    os, json, ast, shutil, logging, subprocess, datetime,
+    os, json, ast, logging, subprocess, datetime,
     _load_json, _save_json, DATA_DIR,
 )
 

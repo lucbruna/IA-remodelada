@@ -27,15 +27,12 @@ Uso:
 
 import os
 import re
-import json
 import logging
-import subprocess
 from datetime import datetime
-from typing import Optional, Dict, Any, List, Set
-from pathlib import Path
+from typing import Dict, Any, List, Set
 
 from ._common import (
-    os, re, json, logging, datetime,
+    os, re, logging, datetime,
     _load_json, _save_json, DATA_DIR,
 )
 

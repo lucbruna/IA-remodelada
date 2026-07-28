@@ -15,11 +15,8 @@ import time
 import hashlib
 import secrets
 from collections import defaultdict
-from functools import wraps
-from typing import Optional
 
-from fastapi import Request, HTTPException, Security
-from fastapi.security import APIKeyHeader
+from fastapi import Request, HTTPException
 
 # --- Config ---
 API_KEY = os.environ.get("AGENTE_API_KEY", "")

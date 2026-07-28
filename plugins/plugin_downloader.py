@@ -18,7 +18,7 @@ import os
 import re
 import hashlib
 from datetime import datetime
-from typing import Optional, Tuple
+from typing import Optional
 import mimetypes
 
 __version__ = "1.0.0"

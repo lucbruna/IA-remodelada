@@ -12,7 +12,7 @@ import os
 import time
 import logging
 from datetime import datetime, date
-from collections import defaultdict, Counter
+from collections import Counter
 
 __version__ = "1.0.0"
 PLUGIN_NAME = "Analytics e Estatísticas"

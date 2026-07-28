@@ -8,9 +8,6 @@ arquivos de configuracao e templates.
 import os
 import csv
 import json
-import io
-import logging
-from datetime import datetime
 
 __version__ = "1.0.0"
 PLUGIN_NAME = "Geracao de Documentos"

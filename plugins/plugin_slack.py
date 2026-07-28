@@ -15,7 +15,6 @@ __version__ = "1.0.0"
 PLUGIN_NAME = "Slack/Teams/Discord Bot"
 
 import os
-import json
 import logging
 from datetime import datetime
 

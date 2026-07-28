@@ -12,7 +12,6 @@ Fornece uma calculadora visual completa com:
 """
 
 import tkinter as tk
-from typing import Optional
 from .core import (
     Calculadora, Operacao, formatar_numero, avaliar_expressao
 )

@@ -12,15 +12,13 @@ Inspirado no Code Interpreter do ChatGPT que transcende audio nativamente.
 """
 
 import os
-import io
-import json
 import logging
 import tempfile
 from typing import Optional, Dict, Any
 
 from ._common import (
-    os, logging, json, tempfile,
-    DATA_DIR, EMBEDDING_MODEL,
+    os, logging, tempfile,
+    DATA_DIR,
 )
 
 # --- Config ---

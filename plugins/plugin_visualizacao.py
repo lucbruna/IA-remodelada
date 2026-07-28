@@ -7,8 +7,6 @@ histograma, dispersao, e exportacao para PNG/SVG/HTML.
 
 import os
 import json
-import math
-import logging
 from datetime import datetime
 
 __version__ = "1.0.0"

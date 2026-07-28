@@ -1,9 +1,6 @@
 import os
 import sys
-import json
 import time
-import logging
-import subprocess
 import threading
 from datetime import datetime
 from typing import Dict, List, Any, Optional, Tuple
@@ -211,7 +208,6 @@ def download_model(model_name: str, timeout: int = 600) -> Dict[str, Any]:
         _download_progress[model_name] = {"status": "downloading", "progress": 0, "started": time.time()}
 
     try:
-        import ollama
         def progress_callback(current, total):
             with _download_lock:
                 _download_progress[model_name] = {

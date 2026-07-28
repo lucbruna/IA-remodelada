@@ -10,7 +10,6 @@ __version__ = "1.0.0"
 PLUGIN_NAME = "Brave Search"
 
 import os
-import json
 import logging
 
 logger = logging.getLogger(__name__)

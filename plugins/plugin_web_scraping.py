@@ -5,11 +5,7 @@ Web scraping avancado: parse de HTML, extracao de dados,
 formularios, links, imagens e metadados de paginas.
 """
 
-import os
 import re
-import json
-import logging
-from datetime import datetime
 from urllib.parse import urljoin, urlparse
 
 __version__ = "1.0.0"

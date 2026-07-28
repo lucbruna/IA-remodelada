@@ -1,5 +1,4 @@
 from ._common import *
-import requests
 # =======================================================================
 # REGISTRO DE FERRAMENTAS (usado pelo loop do agente)
 # =======================================================================

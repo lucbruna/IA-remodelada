@@ -11,13 +11,10 @@ Uso:
 
 import os
 import sys
-import json
 import tempfile
 import shutil
-import math
 from datetime import datetime
-from unittest.mock import patch, MagicMock, ANY
-from pathlib import Path
+from unittest.mock import patch, MagicMock
 
 import pytest
 
@@ -72,9 +69,6 @@ from agente_core import (
     PluginAPI,
     PluginManager,
     list_plugins,
-    reload_plugins,
-    PLUGINS_DIR,
-    # Internas
     _load_json,
     _save_json,
     _execute_tool_call,

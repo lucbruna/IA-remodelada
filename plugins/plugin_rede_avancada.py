@@ -8,8 +8,6 @@ HTTP requests, download de arquivos, verificacao de status HTTP.
 import os
 import json
 import socket
-import logging
-from datetime import datetime
 
 __version__ = "1.0.0"
 PLUGIN_NAME = "Rede Avancada"

@@ -11,9 +11,7 @@ Plugin de fine-tuning seguro para modelos de linguagem locais. Fornece ferrament
 import os
 import json
 import torch
-import logging
-from typing import Dict, List, Optional, Any, Tuple
-from pathlib import Path
+from typing import Dict, List
 from datetime import datetime
 
 # Importações opcionais para fine-tuning

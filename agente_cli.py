@@ -23,7 +23,6 @@ import os
 import sys
 import shutil
 
-from datetime import datetime
 from typing import Optional
 
 from agente_core import (
@@ -48,7 +47,6 @@ from agente_core import (
     structured_reasoning,
     code_review,
 )
-from config import reload_config
 
 
 # ─── Modelos disponíveis ────────────────────────────────────────────

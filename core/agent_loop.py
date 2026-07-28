@@ -4,9 +4,9 @@ from .memory import *
 from .autonomy import *
 from .turbo_api import *
 from .llm import *
-from .autonomy import _latest_user_text, _autonomous_context_for_turn, _record_autonomy_event, _score_intents, _detect_complexity
-from .llm import _clean_messages, _call_ollama_with_timeout, _chat_with_retries, _stream_chat
-from .memory_pipeline import TOOLS, TOOLS_LIST, SYSTEM_PROMPT
+from .autonomy import _latest_user_text, _autonomous_context_for_turn, _record_autonomy_event
+from .llm import _chat_with_retries, _stream_chat
+from .memory_pipeline import TOOLS, SYSTEM_PROMPT
 def _execute_tool_call(call):
     """
     Executa uma unica chamada de ferramenta de forma blindada: qualquer

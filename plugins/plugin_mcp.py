@@ -13,13 +13,12 @@ Fornece:
 
 __version__ = "1.0.0"
 
-import os
 import json
 import logging
 import threading
 import time
 import queue
-from typing import Any, Optional
+from typing import Any
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 # ======================================================================
@@ -91,7 +90,7 @@ def _make_rpc_error(code: int, message: str, data: Any = None) -> dict:
 def _get_tools_list() -> list[dict]:
     """Retorna a lista de ferramentas registradas no formato MCP."""
     try:
-        from agente_core import TOOLS_LIST, AVAILABLE_FUNCTIONS
+        from agente_core import TOOLS_LIST
         tools = []
         for t in TOOLS_LIST:
             fn = t.get("function", {})
