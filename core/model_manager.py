@@ -25,10 +25,12 @@ MODEL_REGISTRY = {
         "ram_gb": 16,
         "description": "Maquinas intermediarias (16-24GB RAM)",
         "models": [
-            {"name": "qwen2.5:32b", "size_gb": 19, "type": "text", "ctx": 32768, "quality": "alto", "recommended": True},
+            {"name": "qwen2.5:7b", "size_gb": 4.7, "type": "text", "ctx": 8192, "quality": "medio-alto", "recommended": True},
             {"name": "gemma4:12B", "size_gb": 10, "type": "text", "ctx": 8192, "quality": "alto", "recommended": False},
             {"name": "llama3.1:8b", "size_gb": 5.5, "type": "text", "ctx": 32768, "quality": "medio-alto", "recommended": False},
             {"name": "mistral:7b", "size_gb": 4.8, "type": "text", "ctx": 32768, "quality": "medio", "recommended": False},
+            {"name": "bonsai-27b-q4km", "size_gb": 15.4, "type": "text", "ctx": 16384, "quality": "alto", "recommended": False, "note": "GGUF manual - precisa ollama create com Modelfile"},
+            {"name": "bonsai-27b-iq4xs", "size_gb": 14.0, "type": "text", "ctx": 16384, "quality": "alto", "recommended": False, "note": "GGUF manual - mais leve que Q4_K_M"},
         ],
     },
     "large": {

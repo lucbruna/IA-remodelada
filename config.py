@@ -48,10 +48,11 @@ _load_dotenv()
 # ─── Modelos ────────────────────────────────────────────────────────
 # Modelo principal de texto/ferramentas.
 # Opcoes recomendadas (por qualidade):
-#   - qwen2.5:32b (RECOMENDADO - melhor custo/beneficio, 32B params)
-#   - llama3.1:70b (MAIOR QUALIDADE - 70B params, requer 48GB+ RAM)
-#   - qwen2.5:7b (padrao leve - 7B params, roda em 8GB)
+#   - qwen2.5:7b (OTIMIZADO - 7B params, roda bem em 16GB RAM)
+#   - qwen2.5:32b (ALTA QUALIDADE - 32B params, requer 24GB+ RAM)
+#   - llama3.1:70b (MAXIMA QUALIDADE - 70B params, requer 48GB+ RAM)
 #   - gemma4:12b (Google - 12B params, bom equilibrio)
+#   - bonsai-27b-q4km (PRISM ML - 27B params, 15.4GB GGUF, requer ollama create)
 MODEL = os.environ.get("AGENTE_MODEL", "qwen2.5:7b")
 # Modelo multimodal para descrever/perguntar sobre imagens.
 # Opcoes: llava, bakllava, llava:13b, llama3.2-vision:11b
