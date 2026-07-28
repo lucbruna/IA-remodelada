@@ -27,7 +27,6 @@ on:
 
 env:
   PYTHON_VERSION: "3.11"
-  OLLAMA_VERSION: "latest"
 
 jobs:
 
@@ -38,7 +37,7 @@ jobs:
 
     services:
       ollama:
-        image: ollama/ollama:${{ env.OLLAMA_VERSION }}
+        image: ollama/ollama:latest
         ports:
           - 11434:11434
         options: >-
