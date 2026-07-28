@@ -46,7 +46,9 @@ from agente_core import (
 )
 
 # --- Config ---------------------------------------------------------
-from config import TEMPERATURE, NUM_CTX, MAX_TOKENS
+from config import TEMPERATURE, NUM_CTX, MAX_TOKENS, TOP_P, TOP_K, REPEAT_PENALTY
+
+
 HOST = os.environ.get("AGENTE_HOST", "0.0.0.0")
 PORT = int(os.environ.get("AGENTE_PORT", "8000"))
 MODEL_NAME = os.environ.get("AGENTE_MODEL", MODEL)
@@ -246,11 +248,23 @@ tool_call_count = 0
 # --- Helpers para parâmetros do modelo ----------------------------
 
 def _get_chat_options(params: Optional[ChatParams] = None) -> dict:
-    """Retorna dicionário de opções para o Ollama com base nos parâmetros."""
+    """Retorna dicionario de opcoes para o Ollama com base nos parametros."""
     if params:
-        opts = {"num_ctx": params.num_ctx, "temperature": params.temperature}
+        opts = {
+            "num_ctx": params.num_ctx,
+            "temperature": params.temperature,
+            "top_p": TOP_P,
+            "top_k": TOP_K,
+            "repeat_penalty": REPEAT_PENALTY,
+        }
     else:
-        opts = {"num_ctx": NUM_CTX, "temperature": TEMPERATURE}
+        opts = {
+            "num_ctx": NUM_CTX,
+            "temperature": TEMPERATURE,
+            "top_p": TOP_P,
+            "top_k": TOP_K,
+            "repeat_penalty": REPEAT_PENALTY,
+        }
     return opts
 
 

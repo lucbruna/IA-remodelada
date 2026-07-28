@@ -124,7 +124,7 @@ def _stream_chat(model: str, messages: list, tools: list, on_token=None, on_tool
                 messages=messages,
                 tools=tools,
                 keep_alive=OLLAMA_KEEP_ALIVE,
-                options={"num_ctx": NUM_CTX, "temperature": TEMPERATURE},
+                options={"num_ctx": NUM_CTX, "temperature": TEMPERATURE, "top_p": TOP_P, "top_k": TOP_K, "repeat_penalty": REPEAT_PENALTY},
                 stream=True,
             )
             content_parts = []
@@ -199,7 +199,7 @@ def _chat_with_retries(model: str, messages: list, tools: list) -> Any:
                 messages=messages,
                 tools=tools,
                 keep_alive=OLLAMA_KEEP_ALIVE,
-                options={"num_ctx": NUM_CTX, "temperature": TEMPERATURE},
+                options={"num_ctx": NUM_CTX, "temperature": TEMPERATURE, "top_p": TOP_P, "top_k": TOP_K, "repeat_penalty": REPEAT_PENALTY},
             )
         except TimeoutError as e:
             last_error = e

@@ -63,13 +63,17 @@ EMBEDDING_MODEL = os.environ.get("AGENTE_EMBEDDING_MODEL", "nomic-embed-text")
 WHISPER_MODEL = os.environ.get("AGENTE_WHISPER_MODEL", "whisper-large-v3")
 
 # ─── Qualidade de raciocínio ────────────────────────────────────────
-# Otimizado para qwen2.5:7b em 16GB RAM (oficial Qwen docs)
-# num_ctx 8192: suficiente para código/chat, KV cache cabe em ~1.5GB RAM
+# Otimizado para qwen2.5:7b em 16GB RAM + GTX 1060 6GB GPU
+# num_ctx 8192: otimo para código/chat, KV cache cabe em ~1.5GB RAM
 # temperature 0.6: equilíbrio entre criatividade e precisão
+# top_p 0.9: reduz tokens improváveis, melhora qualidade
+# repeat_penalty 1.05: evita repetições
 NUM_CTX = int(os.environ.get("AGENTE_NUM_CTX", "8192"))
 TEMPERATURE = float(os.environ.get("AGENTE_TEMPERATURE", "0.6"))
-# Max tokens na resposta (0 = sem limite, usa padrao do modelo)
 MAX_TOKENS = int(os.environ.get("AGENTE_MAX_TOKENS", "4096"))
+TOP_P = float(os.environ.get("AGENTE_TOP_P", "0.9"))
+TOP_K = int(os.environ.get("AGENTE_TOP_K", "40"))
+REPEAT_PENALTY = float(os.environ.get("AGENTE_REPEAT_PENALTY", "1.05"))
 
 # ─── Robustez (evita travamentos e loops) ───────────────────────────
 OLLAMA_TIMEOUT_SECONDS = int(os.environ.get("AGENTE_TIMEOUT", "300"))
@@ -153,11 +157,14 @@ def load_optimized_parameters() -> None:
             return
 
         ranges = {
-            "num_ctx": (4096, 131072),
+            "num_ctx": (4096, 16384),
             "temperature": (0.1, 1.0),
             "max_tool_rounds": (5, 30),
             "history_messages": (20, 200),
             "timeout_seconds": (30, 300),
+            "top_p": (0.5, 1.0),
+            "top_k": (10, 100),
+            "repeat_penalty": (1.0, 1.5),
         }
         mapping = {
             "num_ctx": "NUM_CTX",
@@ -165,6 +172,9 @@ def load_optimized_parameters() -> None:
             "max_tool_rounds": "MAX_TOOL_ROUNDS",
             "history_messages": "MAX_HISTORY_MESSAGES",
             "timeout_seconds": "OLLAMA_TIMEOUT_SECONDS",
+            "top_p": "TOP_P",
+            "top_k": "TOP_K",
+            "repeat_penalty": "REPEAT_PENALTY",
         }
         for key, var in mapping.items():
             if key not in params:
